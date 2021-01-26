@@ -179,13 +179,19 @@ class Utility
     {
         if ($this->exists()) {
             if (pathinfo($this->path, PATHINFO_EXTENSION) === 'php') {
-                $lines = file($this->path);
-                $array = preg_grep('/^namespace /i', $lines);
-                $namespaceLine = array_shift($array);
-                $match = [];
-                preg_match('/^namespace (.*);$/i', $namespaceLine, $match);
-
-                $namespace = array_pop($match);
+                $handle = fopen($this->path, "r");
+                $namespace = null;
+                if ($handle) {
+                    while (($line = fgets($handle)) !== false) {
+                        if (preg_match('/^namespace /i', $line) === 1) {
+                            $match = [];
+                            preg_match('/^namespace (.*);$/i', $line, $match);
+                            $namespace = array_pop($match);
+                            break;
+                        }
+                    }
+                    fclose($handle);
+                }
 
                 if (is_null($namespace)) {
                     throw new FileFormatExpection("$this->path has no namespace");
