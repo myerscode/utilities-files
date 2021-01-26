@@ -41,7 +41,7 @@ class Utility
     }
 
     /**
-     * Get the PSR4 class name of the file
+     * Get the assumed PRS4 class name for the file
      *
      * @return string
      */
@@ -55,17 +55,21 @@ class Utility
     }
 
     /**
-     * Remove the file or directory
+     * Delete the file or directory with the given path
+     *
+     * @return Utility
      */
-    public function delete(): void
+    public function delete(): Utility
     {
         if ($this->filesystem->exists($this->path)) {
             $this->filesystem->remove($this->path);
         }
+
+        return new self($this->path);
     }
 
     /**
-     * Does the file or directory exist
+     * Does the file or directory actually exists
      *
      * @return bool
      */
@@ -75,7 +79,7 @@ class Utility
     }
 
     /**
-     * Find files in a directory
+     * Get a collection of spl file objects, from within the path if it's a directory
      *
      * @return array
      */
@@ -89,7 +93,7 @@ class Utility
     }
 
     /**
-     * Get the fully qualified class name from the file (if its a PHP file)
+     * Get the fully qualified class name from the file (if it's a PHP file)
      *
      * @return string
      *
@@ -128,6 +132,18 @@ class Utility
     }
 
     /**
+     * Create a new instance of the files utility
+     *
+     * @param $path
+     *
+     * @return Utility
+     */
+    static public function make($path): Utility
+    {
+        return new static($path);
+    }
+
+    /**
      * Get the namespace from the file (if its a PHP file)
      *
      * @return string
@@ -154,16 +170,21 @@ class Utility
     }
 
     /**
-     * Touch a file or directory, ensuring it exists
+     * Get then path of the file or directory
+     *
+     * @return string
      */
-    public function touch(): void
+    public function path() : string
+    {
+        return $this->path;
+    }
+
+    /**
+     * Touch a file or directory, to ensure it exists
+     */
+    public function touch(): Utility
     {
         if (!$this->filesystem->exists($this->path)) {
-            // check if is a portable POSIX filepath
-            if (!preg_match('/^[\/\w\-. ]+$/', $this->path)) {
-                throw new InvalidArgumentException("$this->path is an invalid POSIX file path.");
-            }
-
             // if has has a extension, assume its a file
             if ('' !== pathinfo($this->path, PATHINFO_EXTENSION)) {
                 $this->filesystem->touch($this->path);
@@ -171,6 +192,8 @@ class Utility
                 $this->filesystem->mkdir($this->path);
             }
         }
+
+        return new self($this->path);
     }
 
 }
