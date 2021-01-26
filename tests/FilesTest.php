@@ -18,9 +18,9 @@ class FilesTest extends BaseTestSuite
 
         $helper = $this->utility(__DIR__.'/Resources/');
         $expectedResult = [
-            new \Symfony\Component\Finder\SplFileInfo(__DIR__.'/Resources/RandomClassForTestingWith.php', '', 'RandomClassForTestingWith.php'),
-            new \Symfony\Component\Finder\SplFileInfo(__DIR__.'/Resources/RandomFileForTestingWith.js', '', 'RandomFileForTestingWith.js'),
-            new \Symfony\Component\Finder\SplFileInfo(__DIR__.'/Resources/RandomPHPFileForTestingWithoutNamespace.php', '', 'RandomPHPFileForTestingWithoutNamespace.php'),
+            new \Symfony\Component\Finder\SplFileInfo($this->resourceFilePath('RandomClassForTestingWith.php'), '', 'RandomClassForTestingWith.php'),
+            new \Symfony\Component\Finder\SplFileInfo($this->resourceFilePath('RandomFileForTestingWith.js'), '', 'RandomFileForTestingWith.js'),
+            new \Symfony\Component\Finder\SplFileInfo($this->resourceFilePath('RandomPHPFileForTestingWithoutNamespace.php'), '', 'RandomPHPFileForTestingWithoutNamespace.php'),
         ];
         $this->assertEquals($expectedResult, $helper->files());
     }
@@ -30,8 +30,7 @@ class FilesTest extends BaseTestSuite
      */
     public function testThrowsExceptionIfPathIsNotADirectory()
     {
-
-        $helper = $this->utility(__DIR__.'/Resources/RandomClassForTestingWith.php');
+        $helper = $this->utility($this->resourceFilePath('RandomClassForTestingWith.php'));
 
         $this->expectException(NotADirectoryException::class);
         $helper->files();

@@ -14,7 +14,7 @@ class ClassNameTest extends BaseTestSuite
     public function testUtilityGetsClassNameFromFileName()
     {
 
-        $helper = $this->utility(__DIR__.'/Resources/RandomClassForTestingWith.php');
+        $helper = $this->utility($this->resourceFilePath('RandomClassForTestingWith.php'));
         $this->assertEquals('RandomClassForTestingWith', $helper->className());
     }
 
