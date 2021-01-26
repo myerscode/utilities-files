@@ -18,7 +18,7 @@ class NamespaceTest extends BaseTestSuite
     public function testUtilityCanFindPHPNamespace()
     {
 
-        $helper = $this->utility(__DIR__.'/Resources/RandomClassForTestingWith.php');
+        $helper = $this->utility($this->resourceFilePath('RandomClassForTestingWith.php'));
         $this->assertEquals('Tests\Resources', $helper->namespace());
     }
 
@@ -28,7 +28,7 @@ class NamespaceTest extends BaseTestSuite
     public function testUtilityThrowsErrorIfFileIsNotPHP()
     {
 
-        $helper = $this->utility(__DIR__.'/Resources/RandomFileForTestingWith.js');
+        $helper = $this->utility($this->resourceFilePath('RandomFileForTestingWith.js'));
         $this->expectException(InvalidFileTypeException::class);
         $helper->namespace();
     }
@@ -39,7 +39,7 @@ class NamespaceTest extends BaseTestSuite
     public function testUtilityThrowsErrorIfFileIsNotFound()
     {
 
-        $helper = $this->utility(__DIR__.'/Resources/RandomFileForTestingWith.whoops');
+        $helper = $this->utility($this->resourceFilePath('RandomFileForTestingWith.whoops'));
         $this->expectException(FileNotFoundException::class);
         $helper->namespace();
     }
@@ -50,7 +50,7 @@ class NamespaceTest extends BaseTestSuite
     public function testUtilityThrowsErrorIfFileDoesNotHaveANamespace()
     {
 
-        $helper = $this->utility(__DIR__.'/Resources/RandomPHPFileForTestingWithoutNamespace.php');
+        $helper = $this->utility($this->resourceFilePath('RandomPHPFileForTestingWithoutNamespace.php'));
         $this->expectException(FileFormatExpection::class);
         $helper->namespace();
     }

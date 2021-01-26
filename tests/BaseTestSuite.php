@@ -25,14 +25,20 @@ abstract class BaseTestSuite extends TestCase
         return new Utility($config);
     }
 
+    public function resourceFilePath(string $file): string
+    {
+        $dir = __DIR__.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR;
+        return $dir . $file;
+    }
+
     public function tempDirectoryName(): string
     {
-        return sys_get_temp_dir().'/'.uniqid('myerscode');
+        return sys_get_temp_dir().DIRECTORY_SEPARATOR.uniqid('myerscode');
     }
 
     public function tempFileName($extension = '.tmp'): string
     {
-        return sys_get_temp_dir().'/'.uniqid('myerscode').$extension;
+        return sys_get_temp_dir().DIRECTORY_SEPARATOR.uniqid('myerscode').$extension;
     }
 
     public function makeTempDirectory(string $directory = null): string

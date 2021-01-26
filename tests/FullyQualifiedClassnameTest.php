@@ -2,7 +2,6 @@
 
 namespace Tests;
 
-use http\Exception\InvalidArgumentException;
 use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
 use Myerscode\Utilities\Files\Exceptions\InvalidFileTypeException;
 
@@ -17,8 +16,7 @@ class FullyQualifiedClassnameTest extends BaseTestSuite
      */
     public function testUtilityCanFindPHPClassName()
     {
-
-        $helper = $this->utility( __DIR__ . '/Resources/RandomClassForTestingWith.php' );
+        $helper = $this->utility($this->resourceFilePath('RandomClassForTestingWith.php'));
         $this->assertEquals('Tests\Resources\RandomClassForTestingWith', $helper->fullyQualifiedClassname());
     }
 
@@ -28,7 +26,7 @@ class FullyQualifiedClassnameTest extends BaseTestSuite
     public function testUtilityThrowsErrorIfFileIsNotPHP()
     {
 
-        $helper = $this->utility( __DIR__ . '/Resources/RandomFileForTestingWith.js' );
+        $helper = $this->utility($this->resourceFilePath('RandomFileForTestingWith.js'));
         $this->expectException(InvalidFileTypeException::class);
         $helper->fullyQualifiedClassname();
     }
@@ -39,7 +37,7 @@ class FullyQualifiedClassnameTest extends BaseTestSuite
     public function testUtilityThrowsErrorIfFileIsNotFound()
     {
 
-        $helper = $this->utility( __DIR__ . '/Resources/RandomFileForTestingWith.whoops' );
+        $helper = $this->utility($this->resourceFilePath('RandomFileForTestingWith.whoops'));
         $this->expectException(FileNotFoundException::class);
         $helper->fullyQualifiedClassname();
     }

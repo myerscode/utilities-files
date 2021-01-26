@@ -52,7 +52,7 @@
   },
   "scripts": {
     "tests": "vendor/bin/phpunit --testdox --colors=always",
-    "test-coverage": "vendor/bin/phpunit --coverage-html coverage",
+    "test-coverage": "vendor/bin/phpunit --testdox --coverage-html coverage",
     "phpcs": "vendor/bin/phpcs src tests --standard=PSR12"
   }
 }

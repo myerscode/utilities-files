@@ -35,9 +35,27 @@ class Utility
 
     public function __construct(string $path)
     {
-        $this->path = $path;
+        $this->path = $this->cleanPath($path);
         $this->filesystem = new Filesystem();
         $this->finder = new Finder();
+    }
+
+    /**
+     * Clean up the path for usage
+     *
+     * @param $path
+     *
+     * @return string
+     */
+    protected function cleanPath($path): string
+    {
+        // remove duplicate directory slashes
+        $path = preg_replace('/(\/)+/', '$1', $path);
+
+        // change directory slash to platforms seperator
+        $path = preg_replace('/\//', DIRECTORY_SEPARATOR, $path);
+
+        return $path;
     }
 
     /**
@@ -47,7 +65,7 @@ class Utility
      */
     public function className(): string
     {
-        $directoriesAndFilename = explode('/', $this->path);
+        $directoriesAndFilename = explode(DIRECTORY_SEPARATOR, $this->path);
         $filename = array_pop($directoriesAndFilename);
         $nameAndExtension = explode('.', $filename);
 
@@ -161,13 +179,20 @@ class Utility
     {
         if ($this->exists()) {
             if (pathinfo($this->path, PATHINFO_EXTENSION) === 'php') {
-                $lines = file($this->path);
-                $array = preg_grep('/^namespace /i', $lines);
-                $namespaceLine = array_shift($array);
-                $match = [];
-                preg_match('/^namespace (.*);$/i', $namespaceLine, $match);
-
-                $namespace = array_pop($match);
+                $handle = fopen( addslashes($this->path), "r");
+                $namespace = null;
+                if ($handle) {
+                    while (($line = fgets($handle)) !== false) {
+                        if (strpos($line, 'namespace') === 0) {
+                            $parts = explode(' ', $line);
+                            $namespace = rtrim(trim($parts[1]), ';');
+                            break;
+                        }
+                    }
+                    fclose($handle);
+                } else {
+                    throw new FileNotFoundException("Could not open $this->path");
+                }
 
                 if (is_null($namespace)) {
                     throw new FileFormatExpection("$this->path has no namespace");
@@ -186,7 +211,7 @@ class Utility
      *
      * @return string
      */
-    public function path() : string
+    public function path(): string
     {
         return $this->path;
     }
