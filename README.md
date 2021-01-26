@@ -19,9 +19,9 @@ composer require myerscode/utilities-files
 Create an instance of the fluent interface by creating a new instance either via `new Utility($val)` or `Utility::make($val)`
 
 ``` php
-$fileHelper = new Utility;
+$fileHelper = new Utility('./src/file.php');
 
-$fileHelper = Utility::make();
+$fileHelper = Utility::make('./src/file.php');
 ```
 
 ## Methods
