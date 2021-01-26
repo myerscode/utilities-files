@@ -2,6 +2,8 @@
 
 namespace Tests;
 
+use Myerscode\Utilities\Files\Utility;
+
 /**
  * @coversDefaultClass \Myerscode\Utilities\Files\Utility
  */
@@ -23,12 +25,16 @@ class ConstructTest extends BaseTestSuite
     }
 
     /**
-     * @covers ::__construct
+     * @covers ::make
      */
-    public function testUtilityThrowsErrorIfPathIsNotValid()
+    public function testUtilityCanMake()
     {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->utility('$tempName/+\'foo+bar*hello/*@');
-    }
+        $tempName = $this->tempFileName();
+        $helper = Utility::make($tempName);
+        $this->assertEquals($tempName, $helper->path());
 
+        $tempName = $this->tempDirectoryName();
+        $helper = Utility::make($tempName);
+        $this->assertEquals($tempName, $helper->path());
+    }
 }

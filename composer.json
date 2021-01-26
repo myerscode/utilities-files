@@ -7,7 +7,9 @@
     "library",
     "toolkit",
     "chaining",
-    "fluent"
+    "fluent",
+    "path",
+    "directory"
   ],
   "type": "library",
   "license": "MIT",
@@ -25,7 +27,6 @@
   ],
   "require": {
     "php": "^7.3|^8.0",
-    "myerscode/utilities-bags": "^1.2",
     "symfony/filesystem": "^5.2",
     "symfony/finder": "^5.2",
     "symfony/serializer": "^5.2"
