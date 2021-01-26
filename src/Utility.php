@@ -65,7 +65,7 @@ class Utility
      */
     public function className(): string
     {
-        $directoriesAndFilename = explode('/', $this->path);
+        $directoriesAndFilename = explode(DIRECTORY_SEPARATOR, $this->path);
         $filename = array_pop($directoriesAndFilename);
         $nameAndExtension = explode('.', $filename);
 
