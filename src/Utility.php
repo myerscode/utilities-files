@@ -86,7 +86,13 @@ class Utility
     public function files(): array
     {
         if ($this->isDirectory()) {
-            return iterator_to_array($this->finder->files()->in($this->path)->getIterator(), false);
+            $fileList = iterator_to_array($this->finder->files()->in($this->path)->getIterator(), false);
+
+            usort($fileList, function ($a, $b) {
+                return strcmp($a->getRelativePathname(), $b->getRelativePathname());
+            });
+
+            return $fileList;
         }
 
         throw new NotADirectoryException();
