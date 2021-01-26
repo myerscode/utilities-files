@@ -35,9 +35,27 @@ class Utility
 
     public function __construct(string $path)
     {
-        $this->path = $path;
+        $this->path = $this->cleanPath($path);
         $this->filesystem = new Filesystem();
         $this->finder = new Finder();
+    }
+
+    /**
+     * Clean up the path for usage
+     *
+     * @param $path
+     *
+     * @return string
+     */
+    protected function cleanPath($path): string
+    {
+        // remove duplicate directory slashes
+        $path = preg_replace('/(\/)+/', '$1', $path);
+
+        // change directory slash to platforms seperator
+        $path = preg_replace('/\//', DIRECTORY_SEPARATOR, $path);
+
+        return $path;
     }
 
     /**
@@ -186,7 +204,7 @@ class Utility
      *
      * @return string
      */
-    public function path() : string
+    public function path(): string
     {
         return $this->path;
     }

@@ -10,9 +10,6 @@ use Myerscode\Utilities\Files\Utility;
 class ConstructTest extends BaseTestSuite
 {
 
-    /**
-     * @covers ::__construct
-     */
     public function testUtilityAcceptsValidPaths()
     {
         $tempName = $this->tempFileName();
@@ -24,10 +21,7 @@ class ConstructTest extends BaseTestSuite
         $this->assertEquals($tempName, $helper->path());
     }
 
-    /**
-     * @covers ::make
-     */
-    public function testUtilityCanMake()
+    public function testUtilityCanMakeItselfStatically()
     {
         $tempName = $this->tempFileName();
         $helper = Utility::make($tempName);
