@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Myerscode\Utilities\Files\Exceptions\FileFormatExpection;
 use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
 use Myerscode\Utilities\Files\Exceptions\InvalidFileTypeException;
 
@@ -40,6 +41,17 @@ class NamespaceTest extends BaseTestSuite
 
         $helper = $this->utility(__DIR__.'/Resources/RandomFileForTestingWith.whoops');
         $this->expectException(FileNotFoundException::class);
+        $helper->namespace();
+    }
+
+    /**
+     * @covers ::namespace
+     */
+    public function testUtilityThrowsErrorIfFileDoesNotHaveANamespace()
+    {
+
+        $helper = $this->utility(__DIR__.'/Resources/RandomPHPFileForTestingWithoutNamespace.php');
+        $this->expectException(FileFormatExpection::class);
         $helper->namespace();
     }
 }
