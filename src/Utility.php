@@ -162,10 +162,10 @@ class Utility
         if ($this->exists()) {
             if (pathinfo($this->path, PATHINFO_EXTENSION) === 'php') {
                 $lines = file($this->path);
-                $array = preg_grep('/^namespace /', $lines);
+                $array = preg_grep('/^namespace /i', $lines);
                 $namespaceLine = array_shift($array);
                 $match = [];
-                preg_match('/^namespace (.*);$/', $namespaceLine, $match);
+                preg_match('/^namespace (.*);$/i', $namespaceLine, $match);
 
                 $namespace = array_pop($match);
 
