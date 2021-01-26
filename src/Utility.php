@@ -179,7 +179,7 @@ class Utility
     {
         if ($this->exists()) {
             if (pathinfo($this->path, PATHINFO_EXTENSION) === 'php') {
-                $handle = fopen($this->path, "r");
+                $handle = fopen( addslashes($this->path), "r");
                 $namespace = null;
                 if ($handle) {
                     while (($line = fgets($handle)) !== false) {
