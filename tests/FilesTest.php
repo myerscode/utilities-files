@@ -18,8 +18,9 @@ class FilesTest extends BaseTestSuite
 
         $helper = $this->utility(__DIR__.'/Resources/');
         $expectedResult = [
-            new \Symfony\Component\Finder\SplFileInfo(__DIR__.'/Resources/RandomFileForTestingWith.js', '', 'RandomFileForTestingWith.js'),
             new \Symfony\Component\Finder\SplFileInfo(__DIR__.'/Resources/RandomClassForTestingWith.php', '', 'RandomClassForTestingWith.php'),
+            new \Symfony\Component\Finder\SplFileInfo(__DIR__.'/Resources/RandomFileForTestingWith.js', '', 'RandomFileForTestingWith.js'),
+            new \Symfony\Component\Finder\SplFileInfo(__DIR__.'/Resources/RandomPHPFileForTestingWithoutNamespace.php', '', 'RandomPHPFileForTestingWithoutNamespace.php'),
         ];
         $this->assertEquals($expectedResult, $helper->files());
     }

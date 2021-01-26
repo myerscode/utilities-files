@@ -2,7 +2,7 @@
 
 namespace Myerscode\Utilities\Files;
 
-use InvalidArgumentException;
+use Myerscode\Utilities\Files\Exceptions\FileFormatExpection;
 use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
 use Myerscode\Utilities\Files\Exceptions\InvalidFileTypeException;
 use Myerscode\Utilities\Files\Exceptions\NotADirectoryException;
@@ -167,7 +167,13 @@ class Utility
                 $match = [];
                 preg_match('/^namespace (.*);$/', $namespaceLine, $match);
 
-                return array_pop($match);
+                $namespace = array_pop($match);
+
+                if (is_null($namespace)) {
+                    throw new FileFormatExpection("$this->path has no namespace");
+                }
+
+                return $namespace;
             }
             throw new InvalidFileTypeException("$this->path is not a PHP file.");
         }
