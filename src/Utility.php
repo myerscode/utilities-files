@@ -183,10 +183,9 @@ class Utility
                 $namespace = null;
                 if ($handle) {
                     while (($line = fgets($handle)) !== false) {
-                        if (preg_match('/^namespace /i', $line) === 1) {
-                            $match = [];
-                            preg_match('/^namespace (.*);$/i', $line, $match);
-                            $namespace = array_pop($match);
+                        if (strpos($line, 'namespace') === 0) {
+                            $parts = explode(' ', $line);
+                            $namespace = rtrim(trim($parts[1]), ';');
                             break;
                         }
                     }
