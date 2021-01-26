@@ -191,6 +191,8 @@ class Utility
                         }
                     }
                     fclose($handle);
+                } else {
+                    throw new FileNotFoundException("Could not open $this->path");
                 }
 
                 if (is_null($namespace)) {
