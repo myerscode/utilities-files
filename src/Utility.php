@@ -2,7 +2,7 @@
 
 namespace Myerscode\Utilities\Files;
 
-use InvalidArgumentException;
+use Myerscode\Utilities\Files\Exceptions\FileFormatExpection;
 use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
 use Myerscode\Utilities\Files\Exceptions\InvalidFileTypeException;
 use Myerscode\Utilities\Files\Exceptions\NotADirectoryException;
@@ -86,7 +86,13 @@ class Utility
     public function files(): array
     {
         if ($this->isDirectory()) {
-            return iterator_to_array($this->finder->files()->in($this->path)->getIterator(), false);
+            $fileList = iterator_to_array($this->finder->files()->in($this->path)->getIterator(), false);
+
+            usort($fileList, function ($a, $b) {
+                return strcmp($a->getRelativePathname(), $b->getRelativePathname());
+            });
+
+            return $fileList;
         }
 
         throw new NotADirectoryException();
@@ -156,12 +162,18 @@ class Utility
         if ($this->exists()) {
             if (pathinfo($this->path, PATHINFO_EXTENSION) === 'php') {
                 $lines = file($this->path);
-                $array = preg_grep('/^namespace /', $lines);
+                $array = preg_grep('/^namespace /i', $lines);
                 $namespaceLine = array_shift($array);
                 $match = [];
-                preg_match('/^namespace (.*);$/', $namespaceLine, $match);
+                preg_match('/^namespace (.*);$/i', $namespaceLine, $match);
 
-                return array_pop($match);
+                $namespace = array_pop($match);
+
+                if (is_null($namespace)) {
+                    throw new FileFormatExpection("$this->path has no namespace");
+                }
+
+                return $namespace;
             }
             throw new InvalidFileTypeException("$this->path is not a PHP file.");
         }
