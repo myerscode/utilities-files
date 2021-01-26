@@ -21,14 +21,4 @@ class ConstructTest extends BaseTestSuite
         $helper = $this->utility($tempName);
         $this->assertEquals($tempName, $helper->path());
     }
-
-    /**
-     * @covers ::__construct
-     */
-    public function testUtilityThrowsErrorIfPathIsNotValid()
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->utility('$tempName/+\'foo+bar*hello/*@');
-    }
-
 }

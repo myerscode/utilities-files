@@ -35,11 +35,6 @@ class Utility
 
     public function __construct(string $path)
     {
-        // check if is a portable POSIX filepath
-        if (!preg_match('/^[\/\w\-. ]+$/', $path)) {
-            throw new InvalidArgumentException("$path is an invalid POSIX file path.");
-        }
-
         $this->path = $path;
         $this->filesystem = new Filesystem();
         $this->finder = new Finder();
