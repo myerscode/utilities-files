@@ -132,6 +132,18 @@ class Utility
     }
 
     /**
+     * Create a new instance of the files utility
+     *
+     * @param $path
+     *
+     * @return Utility
+     */
+    static public function make($path): Utility
+    {
+        return new static($path);
+    }
+
+    /**
      * Get the namespace from the file (if its a PHP file)
      *
      * @return string
