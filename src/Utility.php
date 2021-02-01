@@ -41,6 +41,18 @@ class Utility
     }
 
     /**
+     * Append content to the file
+     *
+     * @param  string  $content
+     *
+     * @return Utility
+     */
+    public function appendContent(string $content): Utility
+    {
+        return $this->putContent($content, FILE_APPEND);
+    }
+
+    /**
      * Clean up the path for usage
      *
      * @param $path
@@ -56,6 +68,20 @@ class Utility
         $path = preg_replace('/\//', DIRECTORY_SEPARATOR, $path);
 
         return $path;
+    }
+
+    /**
+     * If the file exists get its content
+     *
+     * @return string
+     */
+    public function content(): string
+    {
+        if ($this->isFile()) {
+            return file_get_contents($this->path());
+        } else {
+            throw new FileNotFoundException("$this->path does not exist.");
+        }
     }
 
     /**
@@ -128,7 +154,7 @@ class Utility
     {
         if ($this->exists()) {
             if (pathinfo($this->path, PATHINFO_EXTENSION) === 'php') {
-                return $this->namespace().'\\'.$this->className();
+                return $this->namespace() . '\\' . $this->className();
             }
             throw new InvalidFileTypeException("$this->path is not a PHP file.");
         }
@@ -162,7 +188,7 @@ class Utility
      *
      * @return Utility
      */
-    static public function make($path): Utility
+    public static function make($path): Utility
     {
         return new static($path);
     }
@@ -179,20 +205,17 @@ class Utility
     {
         if ($this->exists()) {
             if (pathinfo($this->path, PATHINFO_EXTENSION) === 'php') {
-                $handle = fopen( addslashes($this->path), "r");
+                $handle = fopen(addslashes($this->path), "r");
                 $namespace = null;
-                if ($handle) {
-                    while (($line = fgets($handle)) !== false) {
-                        if (strpos($line, 'namespace') === 0) {
-                            $parts = explode(' ', $line);
-                            $namespace = rtrim(trim($parts[1]), ';');
-                            break;
-                        }
+
+                while (($line = fgets($handle)) !== false) {
+                    if (strpos($line, 'namespace') === 0) {
+                        $parts = explode(' ', $line);
+                        $namespace = rtrim(trim($parts[1]), ';');
+                        break;
                     }
-                    fclose($handle);
-                } else {
-                    throw new FileNotFoundException("Could not open $this->path");
                 }
+                fclose($handle);
 
                 if (is_null($namespace)) {
                     throw new FileFormatExpection("$this->path has no namespace");
@@ -217,6 +240,37 @@ class Utility
     }
 
     /**
+     * If the file exists, put content into it
+     *
+     * @param  string  $content
+     * @param  int  $flags
+     *
+     * @return Utility
+     */
+    protected function putContent(string $content, int $flags = 0): Utility
+    {
+        if ($this->isFile()) {
+            file_put_contents($this->path(), $content, $flags);
+        } else {
+            throw new FileNotFoundException("$this->path does not exist.");
+        }
+
+        return new self($this->path);
+    }
+
+    /**
+     * Set content to the file
+     *
+     * @param  string  $content
+     *
+     * @return Utility
+     */
+    public function setContent(string $content): Utility
+    {
+        return $this->putContent($content);
+    }
+
+    /**
      * Touch a file or directory, to ensure it exists
      */
     public function touch(): Utility
@@ -232,5 +286,4 @@ class Utility
 
         return new self($this->path);
     }
-
 }
