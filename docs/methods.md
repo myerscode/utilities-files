@@ -5,11 +5,33 @@
 
 Get the assumed PRS4 class name for the file
 
+### content `appendContent`
+
+If the path is a file and if it exists, appends content to the end of the file 
+
+```php
+$file = new Utility('./logfile.txt');
+
+echo $file->appendContent('hello world');
+// ... hello world
+```
+
 ```php
 $file = new Utility('./src/RandomClassForTestingWith.php');
 
 echo $file->className();
 // RandomClassForTestingWith
+```
+
+### content `string`
+
+If the path is a file and if it exists, gets the content of the file
+
+```php
+$file = new Utility('./logfile.txt');
+
+echo $file->content();
+// ...
 ```
 
 ### delete `Utility`
@@ -100,6 +122,17 @@ Get the path of the file
 $file = new Utility('./src/RandomClassForTestingWith.php');
 
 echo $file->path();  // ./src/RandomClassForTestingWith.php
+```
+
+### content `setContent`
+
+If the path is a file and if it exists, sets the content of the file
+
+```php
+$file = new Utility('./logfile.txt');
+
+echo $file->appendContent('hello world');
+// hello world
 ```
 
 ### touch `Utility`
