@@ -41,6 +41,18 @@ class Utility
     }
 
     /**
+     * Append content to the file
+     *
+     * @param  string  $content
+     *
+     * @return Utility
+     */
+    public function appendContent(string $content): Utility
+    {
+        return $this->putContent($content, FILE_APPEND);
+    }
+
+    /**
      * Clean up the path for usage
      *
      * @param $path
@@ -56,6 +68,20 @@ class Utility
         $path = preg_replace('/\//', DIRECTORY_SEPARATOR, $path);
 
         return $path;
+    }
+
+    /**
+     * If the file exists get its content
+     *
+     * @return string
+     */
+    public function content(): string
+    {
+        if ($this->isFile()) {
+            return file_get_contents($this->path());
+        } else {
+            throw new FileNotFoundException("$this->path does not exist.");
+        }
     }
 
     /**
@@ -211,6 +237,37 @@ class Utility
     public function path(): string
     {
         return $this->path;
+    }
+
+    /**
+     * If the file exists, put content into it
+     *
+     * @param  string  $content
+     * @param  int  $flags
+     *
+     * @return Utility
+     */
+    protected function putContent(string $content, int $flags = 0): Utility
+    {
+        if ($this->isFile()) {
+            file_put_contents($this->path(), $content, $flags);
+        } else {
+            throw new FileNotFoundException("$this->path does not exist.");
+        }
+
+        return new self($this->path);
+    }
+
+    /**
+     * Set content to the file
+     *
+     * @param  string  $content
+     *
+     * @return Utility
+     */
+    public function setContent(string $content): Utility
+    {
+        return $this->putContent($content);
     }
 
     /**
