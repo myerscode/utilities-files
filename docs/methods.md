@@ -56,6 +56,19 @@ $file->delete();
 echo $file->exits(); // false
 ```
 
+### extension `string`
+
+Does the file or directory actually exists
+
+```php
+$file = new Utility('./src/RandomClassForTestingWith.php');
+
+echo $file->extension(); // php
+
+// get with dot prefix
+echo $file->exits(true); // .php
+```
+
 ### files `array`
 
 Get a collection of spl file objects, from within the path if it's a directory
@@ -112,6 +125,19 @@ Get the namespace of the file (if it's a PHP file)
 $file = new Utility('./src/RandomClassForTestingWith.php');
 
 echo $file->namespace();  // App
+```
+
+### name `string`
+
+Does the file or directory actually exists
+
+```php
+$file = new Utility('./src/RandomClassForTestingWith.php');
+
+echo $file->name(); // RandomClassForTestingWith
+
+// get with file extension
+echo $file->name(true); // RandomClassForTestingWith.php
 ```
 
 ### path `string`

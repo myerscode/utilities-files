@@ -6,6 +6,7 @@ use Myerscode\Utilities\Files\Exceptions\FileFormatExpection;
 use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
 use Myerscode\Utilities\Files\Exceptions\InvalidFileTypeException;
 use Myerscode\Utilities\Files\Exceptions\NotADirectoryException;
+use SplFileInfo;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
@@ -123,6 +124,28 @@ class Utility
     }
 
     /**
+     * Guess the paths file extension
+     *
+     * @param  bool  $withDot
+     *
+     * @return string
+     */
+    public function extension(bool $withDot = false): string
+    {
+        return implode([$withDot ? '.' : null, $this->fileInfo()->getExtension()]);
+    }
+
+    /**
+     * Create a file info instance
+     *
+     * @return SplFileInfo
+     */
+    protected function fileInfo(): SplFileInfo
+    {
+        return new SplFileInfo($this->path);
+    }
+
+    /**
      * Get a collection of spl file objects, from within the path if it's a directory
      *
      * @return array
@@ -154,7 +177,7 @@ class Utility
     {
         if ($this->exists()) {
             if (pathinfo($this->path, PATHINFO_EXTENSION) === 'php') {
-                return $this->namespace() . '\\' . $this->className();
+                return $this->namespace().'\\'.$this->className();
             }
             throw new InvalidFileTypeException("$this->path is not a PHP file.");
         }
@@ -204,7 +227,7 @@ class Utility
     public function namespace(): string
     {
         if ($this->exists()) {
-            if (pathinfo($this->path, PATHINFO_EXTENSION) === 'php') {
+            if ($this->fileInfo()->getExtension() === 'php') {
                 $handle = fopen(addslashes($this->path), "r");
                 $namespace = null;
 
@@ -227,6 +250,25 @@ class Utility
         }
 
         throw new FileNotFoundException("$this->path does not exist.");
+    }
+
+    /**
+     * Guess the paths filename
+     *
+     * @param  bool  $withExtension
+     *
+     * @return string
+     */
+    public function name(bool $withExtension = false): string
+    {
+
+        if ($withExtension || empty($this->extension())) {
+            return $this->fileInfo()->getFilename();
+        }
+        $fileName = $this->fileInfo()->getFilename();
+        $extension = $this->extension(true);
+
+        return substr($fileName, 0, strlen($fileName) - strlen($extension));
     }
 
     /**
@@ -277,7 +319,7 @@ class Utility
     {
         if (!$this->filesystem->exists($this->path)) {
             // if has has a extension, assume its a file
-            if ('' !== pathinfo($this->path, PATHINFO_EXTENSION)) {
+            if ('' !== $this->fileInfo()->getExtension()) {
                 $this->filesystem->touch($this->path);
             } else {
                 $this->filesystem->mkdir($this->path);
