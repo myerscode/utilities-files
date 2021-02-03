@@ -44,6 +44,20 @@ $file = new Utility('./src/RandomClassForTestingWith.php');
 $file->delete();
 ```
 
+### directory `Utility`
+
+Get the directory of the path
+
+```php
+$file = new Utility('./src/RandomClassForTestingWith.php');
+
+$file->directory(); // ./src
+
+$file = new Utility('./src/App/Commands');
+
+$file->directory(); // ./src/App/Commands
+```
+
 ### exists `bool`
 
 Does the file or directory actually exists

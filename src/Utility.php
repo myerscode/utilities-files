@@ -114,6 +114,23 @@ class Utility
     }
 
     /**
+     * If the path is assumed to be a file, return its directory path
+     * If the path is assumed to be a directory return its path
+     *
+     * @return string
+     */
+    public function directory(): string
+    {
+        // if has has a extension, assume its a file
+        //!empty($this->extension())
+        if ($this->extension()) {
+            return rtrim(dirname($this->path), '/');
+        }
+
+        return rtrim($this->path, '/');
+    }
+
+    /**
      * Does the file or directory actually exists
      *
      * @return bool
@@ -319,7 +336,9 @@ class Utility
     {
         if (!$this->filesystem->exists($this->path)) {
             // if has has a extension, assume its a file
-            if ('' !== $this->fileInfo()->getExtension()) {
+            if (!empty($this->extension())) {
+                // ensure the directory exists before touching the file
+                $this->filesystem->mkdir(dirname($this->path));
                 $this->filesystem->touch($this->path);
             } else {
                 $this->filesystem->mkdir($this->path);
