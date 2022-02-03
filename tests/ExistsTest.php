@@ -2,36 +2,9 @@
 
 namespace Tests;
 
-/**
- * @coversDefaultClass \Myerscode\Utilities\Files\Utility
- */
 class ExistsTest extends BaseTestSuite
 {
-
-    /**
-     * @covers ::exists
-     */
-    public function testUtilityCanCheckForAFilesExistence()
-    {
-        $tempFile = $this->tempFileName();
-
-        $helper = $this->utility($tempFile);
-
-        $this->assertFalse($helper->exists());
-
-        $this->makeTempFile($tempFile);
-
-        $this->assertTrue($helper->exists());
-
-        $helper->delete();
-
-        $this->assertFalse($helper->exists());
-    }
-
-    /**
-     * @covers ::exists
-     */
-    public function testUtilityCanCheckForADirectoriesExistence()
+    public function testUtilityCanCheckForADirectoriesExistence(): void
     {
         $tempDirectory = $this->tempDirectoryName();
 
@@ -40,6 +13,23 @@ class ExistsTest extends BaseTestSuite
         $this->assertFalse($helper->exists());
 
         $this->makeTempDirectory($tempDirectory);
+
+        $this->assertTrue($helper->exists());
+
+        $helper->delete();
+
+        $this->assertFalse($helper->exists());
+    }
+
+    public function testUtilityCanCheckForAFilesExistence(): void
+    {
+        $tempFile = $this->tempFileName();
+
+        $helper = $this->utility($tempFile);
+
+        $this->assertFalse($helper->exists());
+
+        $this->makeTempFile($tempFile);
 
         $this->assertTrue($helper->exists());
 

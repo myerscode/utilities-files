@@ -2,16 +2,9 @@
 
 namespace Tests;
 
-/**
- * @coversDefaultClass \Myerscode\Utilities\Files\Utility
- */
 class TouchTest extends BaseTestSuite
 {
-
-    /**
-     * @covers ::touch
-     */
-    public function testUtilityCanCreateDirectoryIfItDoesNotExist()
+    public function testUtilityCanCreateDirectoryIfItDoesNotExist(): void
     {
         $tempDirectory = $this->tempDirectoryName();
 
@@ -30,10 +23,7 @@ class TouchTest extends BaseTestSuite
         $this->assertFalse($helper->exists());
     }
 
-    /**
-     * @covers ::touch
-     */
-    public function testUtilityCanCreateFileIfItDoesNotExist()
+    public function testUtilityCanCreateFileIfItDoesNotExist(): void
     {
         $tempFile = $this->tempFileName();
 

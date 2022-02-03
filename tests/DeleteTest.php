@@ -2,16 +2,9 @@
 
 namespace Tests;
 
-/**
- * @coversDefaultClass \Myerscode\Utilities\Files\Utility
- */
 class DeleteTest extends BaseTestSuite
 {
-
-    /**
-     * @covers ::delete
-     */
-    public function testUtilityCanDeleteADirectory()
+    public function testUtilityCanDeleteADirectory(): void
     {
         $tempDirectory = $this->tempDirectoryName();
 
@@ -26,10 +19,7 @@ class DeleteTest extends BaseTestSuite
         $this->assertFalse($helper->exists());
     }
 
-    /**
-     * @covers ::delete
-     */
-    public function testUtilityCanDeleteAFile()
+    public function testUtilityCanDeleteAFile(): void
     {
         $tempDirectory = $this->tempFileName();
 

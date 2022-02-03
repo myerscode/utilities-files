@@ -7,14 +7,13 @@ namespace Tests;
  */
 class PathTest extends BaseTestSuite
 {
-
     /**
      * @covers ::path
      */
-    public function testUtilityAcceptsValidPaths()
+    public function testUtilityAcceptsValidPaths(): void
     {
         $tempName = $this->tempFileName();
-        $helper = $this->utility($tempName);
-        $this->assertEquals($tempName, $helper->path());
+        $utility = $this->utility($tempName);
+        $this->assertEquals($tempName, $utility->path());
     }
 }
