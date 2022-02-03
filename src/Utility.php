@@ -158,6 +158,23 @@ class Utility
         throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
     }
 
+    public function hasAbsolutePath(): bool
+    {
+        if (
+            '/' == $this->path[0]
+            || '\\' == $this->path[0]
+            || (strlen($this->path) > 3 && ctype_alpha($this->path[0])
+                && ':' == $this->path[1]
+                && ('\\' == $this->path[2] || '/' == $this->path[2])
+            )
+            || null !== parse_url($this->path, PHP_URL_SCHEME)
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Is the path a directory
      */
