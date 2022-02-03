@@ -4,7 +4,7 @@
 [![Latest Stable Version](https://poser.pugx.org/myerscode/utilities-files/v/stable)](https://packagist.org/packages/myerscode/utilities-files)
 [![Total Downloads](https://poser.pugx.org/myerscode/utilities-files/downloads)](https://packagist.org/packages/myerscode/utilities-files)
 [![License](https://poser.pugx.org/myerscode/utilities-files/license)](https://packagist.org/packages/myerscode/utilities-files)
-![Tests](https://github.com/myerscode/utilities-files/workflows/Tests/badge.svg?branch=master)
+![Tests](https://github.com/myerscode/utilities-files/workflows/tests/badge.svg?branch=main)
 
 ## Install
 
