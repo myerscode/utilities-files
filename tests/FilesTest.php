@@ -3,32 +3,11 @@
 namespace Tests;
 
 use Myerscode\Utilities\Files\Exceptions\NotADirectoryException;
+use Symfony\Component\Finder\SplFileInfo;
 
-/**
- * @coversDefaultClass \Myerscode\Utilities\Files\Utility
- */
 class FilesTest extends BaseTestSuite
 {
-
-    /**
-     * @covers ::files
-     */
-    public function testUtilityCanFilesInADirectory()
-    {
-
-        $helper = $this->utility(__DIR__.'/Resources/');
-        $expectedResult = [
-            new \Symfony\Component\Finder\SplFileInfo($this->resourceFilePath('RandomClassForTestingWith.php'), '', 'RandomClassForTestingWith.php'),
-            new \Symfony\Component\Finder\SplFileInfo($this->resourceFilePath('RandomFileForTestingWith.js'), '', 'RandomFileForTestingWith.js'),
-            new \Symfony\Component\Finder\SplFileInfo($this->resourceFilePath('RandomPHPFileForTestingWithoutNamespace.php'), '', 'RandomPHPFileForTestingWithoutNamespace.php'),
-        ];
-        $this->assertEquals($expectedResult, $helper->files());
-    }
-
-    /**
-     * @covers ::files
-     */
-    public function testThrowsExceptionIfPathIsNotADirectory()
+    public function testThrowsExceptionIfPathIsNotADirectory(): void
     {
         $helper = $this->utility($this->resourceFilePath('RandomClassForTestingWith.php'));
 
@@ -36,4 +15,18 @@ class FilesTest extends BaseTestSuite
         $helper->files();
     }
 
+    public function testUtilityCanFilesInADirectory(): void
+    {
+        $helper = $this->utility(__DIR__ . '/Resources/');
+        $expectedResult = [
+            new SplFileInfo($this->resourceFilePath('RandomClassForTestingWith.php'), '', 'RandomClassForTestingWith.php'),
+            new SplFileInfo($this->resourceFilePath('RandomFileForTestingWith.js'), '', 'RandomFileForTestingWith.js'),
+            new SplFileInfo(
+                $this->resourceFilePath('RandomPHPFileForTestingWithoutNamespace.php'),
+                '',
+                'RandomPHPFileForTestingWithoutNamespace.php'
+            ),
+        ];
+        $this->assertEquals($expectedResult, $helper->files());
+    }
 }

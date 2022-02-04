@@ -4,13 +4,9 @@ namespace Tests;
 
 use Myerscode\Utilities\Files\Utility;
 
-/**
- * @coversDefaultClass \Myerscode\Utilities\Files\Utility
- */
 class ConstructTest extends BaseTestSuite
 {
-
-    public function testUtilityAcceptsValidPaths()
+    public function testUtilityAcceptsValidPaths(): void
     {
         $tempName = $this->tempFileName();
         $helper = $this->utility($tempName);
@@ -21,7 +17,7 @@ class ConstructTest extends BaseTestSuite
         $this->assertEquals($tempName, $helper->path());
     }
 
-    public function testUtilityCanMakeItselfStatically()
+    public function testUtilityCanMakeItselfStatically(): void
     {
         $tempName = $this->tempFileName();
         $helper = Utility::make($tempName);

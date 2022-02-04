@@ -4,5 +4,4 @@ namespace Tests\Resources;
 
 class RandomClassForTestingWith
 {
-
 }

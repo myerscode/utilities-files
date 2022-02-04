@@ -14,38 +14,12 @@ abstract class BaseTestSuite extends TestCase
      */
     public $utility = Utility::class;
 
-
-    /**
-     * @param $config
-     *
-     * @return Utility
-     */
-    public function utility($config)
-    {
-        return new Utility($config);
-    }
-
-    public function resourceFilePath(string $file): string
-    {
-        $dir = __DIR__.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR;
-        return $dir . $file;
-    }
-
-    public function tempDirectoryName(): string
-    {
-        return sys_get_temp_dir().DIRECTORY_SEPARATOR.uniqid('myerscode');
-    }
-
-    public function tempFileName($extension = '.tmp'): string
-    {
-        return sys_get_temp_dir().DIRECTORY_SEPARATOR.uniqid('myerscode').$extension;
-    }
-
     public function makeTempDirectory(string $directory = null): string
     {
         if (is_null($directory)) {
             $directory = $this->tempDirectoryName();
         }
+
         mkdir($directory);
 
         return $directory;
@@ -56,9 +30,34 @@ abstract class BaseTestSuite extends TestCase
         if (is_null($file)) {
             $file = $this->tempFileName();
         }
+
         touch($file);
 
         return $file;
     }
 
+    public function resourceFilePath(string $file): string
+    {
+        $dir = __DIR__ . DIRECTORY_SEPARATOR . 'Resources' . DIRECTORY_SEPARATOR;
+
+        return $dir . $file;
+    }
+
+    public function tempDirectoryName(): string
+    {
+        return sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('myerscode');
+    }
+
+    public function tempFileName($extension = '.tmp'): string
+    {
+        return sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('myerscode') . $extension;
+    }
+
+    /**
+     * @param $config
+     */
+    public function utility($config): Utility
+    {
+        return new Utility($config);
+    }
 }

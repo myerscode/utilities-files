@@ -6,6 +6,7 @@ use Myerscode\Utilities\Files\Exceptions\FileFormatExpection;
 use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
 use Myerscode\Utilities\Files\Exceptions\InvalidFileTypeException;
 use Myerscode\Utilities\Files\Exceptions\NotADirectoryException;
+use SplFileInfo;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
@@ -16,21 +17,17 @@ use Symfony\Component\Finder\Finder;
  */
 class Utility
 {
-
     /**
      * @var Filesystem
      */
-    private $filesystem;
+    private readonly Filesystem $filesystem;
 
     /**
      * @var Finder
      */
-    private $finder;
+    private readonly Finder $finder;
 
-    /**
-     * @var string
-     */
-    private $path;
+    private readonly string $path;
 
 
     public function __construct(string $path)
@@ -41,11 +38,19 @@ class Utility
     }
 
     /**
-     * Append content to the file
+     * Create a new instance of the files utility
      *
-     * @param  string  $content
+     * @param $path
      *
      * @return Utility
+     */
+    public static function make($path): static
+    {
+        return new static($path);
+    }
+
+    /**
+     * Append content to the file
      */
     public function appendContent(string $content): Utility
     {
@@ -53,41 +58,7 @@ class Utility
     }
 
     /**
-     * Clean up the path for usage
-     *
-     * @param $path
-     *
-     * @return string
-     */
-    protected function cleanPath($path): string
-    {
-        // remove duplicate directory slashes
-        $path = preg_replace('/(\/)+/', '$1', $path);
-
-        // change directory slash to platforms seperator
-        $path = preg_replace('/\//', DIRECTORY_SEPARATOR, $path);
-
-        return $path;
-    }
-
-    /**
-     * If the file exists get its content
-     *
-     * @return string
-     */
-    public function content(): string
-    {
-        if ($this->isFile()) {
-            return file_get_contents($this->path());
-        } else {
-            throw new FileNotFoundException("$this->path does not exist.");
-        }
-    }
-
-    /**
      * Get the assumed PRS4 class name for the file
-     *
-     * @return string
      */
     public function className(): string
     {
@@ -99,9 +70,18 @@ class Utility
     }
 
     /**
+     * If the file exists get its content
+     */
+    public function content(): bool|string
+    {
+        if ($this->isFile()) {
+            return file_get_contents($this->path());
+        }
+        throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
+    }
+
+    /**
      * Delete the file or directory with the given path
-     *
-     * @return Utility
      */
     public function delete(): Utility
     {
@@ -113,9 +93,22 @@ class Utility
     }
 
     /**
+     * If the path is assumed to be a file, return its directory path
+     * If the path is assumed to be a directory return its path
+     */
+    public function directory(): string
+    {
+        // if has has a extension, assume its a file
+        //!empty($this->extension())
+        if ($this->extension() !== '' && $this->extension() !== '0') {
+            return rtrim(dirname($this->path), '/');
+        }
+
+        return rtrim($this->path, '/');
+    }
+
+    /**
      * Does the file or directory actually exists
-     *
-     * @return bool
      */
     public function exists(): bool
     {
@@ -123,18 +116,22 @@ class Utility
     }
 
     /**
+     * Guess the paths file extension
+     */
+    public function extension(bool $withDot = false): string
+    {
+        return implode('', [$withDot ? '.' : null, $this->fileInfo()->getExtension()]);
+    }
+
+    /**
      * Get a collection of spl file objects, from within the path if it's a directory
-     *
-     * @return array
      */
     public function files(): array
     {
         if ($this->isDirectory()) {
             $fileList = iterator_to_array($this->finder->files()->in($this->path)->getIterator(), false);
 
-            usort($fileList, function ($a, $b) {
-                return strcmp($a->getRelativePathname(), $b->getRelativePathname());
-            });
+            usort($fileList, fn($a, $b): int => strcmp($a->getRelativePathname(), $b->getRelativePathname()));
 
             return $fileList;
         }
@@ -145,8 +142,6 @@ class Utility
     /**
      * Get the fully qualified class name from the file (if it's a PHP file)
      *
-     * @return string
-     *
      * @throws InvalidFileTypeException
      * @throws FileNotFoundException
      */
@@ -156,15 +151,15 @@ class Utility
             if (pathinfo($this->path, PATHINFO_EXTENSION) === 'php') {
                 return $this->namespace() . '\\' . $this->className();
             }
-            throw new InvalidFileTypeException("$this->path is not a PHP file.");
+
+            throw new InvalidFileTypeException(sprintf('%s is not a PHP file.', $this->path));
         }
-        throw new FileNotFoundException("$this->path does not exist.");
+
+        throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
     }
 
     /**
      * Is the path a directory
-     *
-     * @return bool
      */
     public function isDirectory(): bool
     {
@@ -173,8 +168,6 @@ class Utility
 
     /**
      * Is the path a file
-     *
-     * @return bool
      */
     public function isFile(): bool
     {
@@ -182,21 +175,24 @@ class Utility
     }
 
     /**
-     * Create a new instance of the files utility
-     *
-     * @param $path
-     *
-     * @return Utility
+     * Guess the paths filename
      */
-    public static function make($path): Utility
+    public function name(bool $withExtension = false): string
     {
-        return new static($path);
+        if ($withExtension) {
+            return $this->fileInfo()->getFilename();
+        }
+        if (empty($this->extension())) {
+            return $this->fileInfo()->getFilename();
+        }
+        $fileName = $this->fileInfo()->getFilename();
+        $extension = $this->extension(true);
+
+        return substr($fileName, 0, strlen($fileName) - strlen($extension));
     }
 
     /**
      * Get the namespace from the file (if its a PHP file)
-     *
-     * @return string
      *
      * @throws InvalidFileTypeException
      * @throws FileNotFoundException
@@ -204,35 +200,35 @@ class Utility
     public function namespace(): string
     {
         if ($this->exists()) {
-            if (pathinfo($this->path, PATHINFO_EXTENSION) === 'php') {
+            if ($this->fileInfo()->getExtension() === 'php') {
                 $handle = fopen(addslashes($this->path), "r");
                 $namespace = null;
 
                 while (($line = fgets($handle)) !== false) {
-                    if (strpos($line, 'namespace') === 0) {
+                    if (str_starts_with($line, 'namespace')) {
                         $parts = explode(' ', $line);
                         $namespace = rtrim(trim($parts[1]), ';');
                         break;
                     }
                 }
+
                 fclose($handle);
 
                 if (is_null($namespace)) {
-                    throw new FileFormatExpection("$this->path has no namespace");
+                    throw new FileFormatExpection(sprintf('%s has no namespace', $this->path));
                 }
 
                 return $namespace;
             }
-            throw new InvalidFileTypeException("$this->path is not a PHP file.");
+
+            throw new InvalidFileTypeException(sprintf('%s is not a PHP file.', $this->path));
         }
 
-        throw new FileNotFoundException("$this->path does not exist.");
+        throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
     }
 
     /**
      * Get then path of the file or directory
-     *
-     * @return string
      */
     public function path(): string
     {
@@ -240,30 +236,7 @@ class Utility
     }
 
     /**
-     * If the file exists, put content into it
-     *
-     * @param  string  $content
-     * @param  int  $flags
-     *
-     * @return Utility
-     */
-    protected function putContent(string $content, int $flags = 0): Utility
-    {
-        if ($this->isFile()) {
-            file_put_contents($this->path(), $content, $flags);
-        } else {
-            throw new FileNotFoundException("$this->path does not exist.");
-        }
-
-        return new self($this->path);
-    }
-
-    /**
      * Set content to the file
-     *
-     * @param  string  $content
-     *
-     * @return Utility
      */
     public function setContent(string $content): Utility
     {
@@ -277,11 +250,51 @@ class Utility
     {
         if (!$this->filesystem->exists($this->path)) {
             // if has has a extension, assume its a file
-            if ('' !== pathinfo($this->path, PATHINFO_EXTENSION)) {
+            if (!empty($this->extension())) {
+                // ensure the directory exists before touching the file
+                $this->filesystem->mkdir(dirname($this->path));
                 $this->filesystem->touch($this->path);
             } else {
                 $this->filesystem->mkdir($this->path);
             }
+        }
+
+        return new self($this->path);
+    }
+
+    /**
+     * Clean up the path for usage
+     *
+     * @param $path
+     *
+     * @return string
+     */
+    protected function cleanPath($path): string
+    {
+        // remove duplicate directory slashes
+        $path = preg_replace('#(\/)+#', '$1', $path);
+
+        // change directory slash to platforms seperator
+        return preg_replace('#\/#', DIRECTORY_SEPARATOR, $path);
+    }
+
+    /**
+     * Create a file info instance
+     */
+    protected function fileInfo(): SplFileInfo
+    {
+        return new SplFileInfo($this->path);
+    }
+
+    /**
+     * If the file exists, put content into it
+     */
+    protected function putContent(string $content, int $flags = 0): Utility
+    {
+        if ($this->isFile()) {
+            file_put_contents($this->path(), $content, $flags);
+        } else {
+            throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
         }
 
         return new self($this->path);

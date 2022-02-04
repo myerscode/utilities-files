@@ -2,30 +2,9 @@
 
 namespace Tests;
 
-/**
- * @coversDefaultClass \Myerscode\Utilities\Files\Utility
- */
 class IsFileTest extends BaseTestSuite
 {
-
-    /**
-     * @covers ::isFile
-     */
-    public function testReturnsTrueIfPathIsAFile()
-    {
-        $tempFile = $this->makeTempFile();
-
-        $helper = $this->utility($tempFile);
-
-        $this->assertTrue($helper->isFile());
-
-        $helper->delete();
-    }
-
-    /**
-     * @covers ::isFile
-     */
-    public function testReturnsFalseIfFileNotFound()
+    public function testReturnsFalseIfFileNotFound(): void
     {
         $tempFile = $this->makeTempFile();
 
@@ -34,5 +13,16 @@ class IsFileTest extends BaseTestSuite
         $helper->delete();
 
         $this->assertFalse($helper->isFile());
+    }
+
+    public function testReturnsTrueIfPathIsAFile(): void
+    {
+        $tempFile = $this->makeTempFile();
+
+        $helper = $this->utility($tempFile);
+
+        $this->assertTrue($helper->isFile());
+
+        $helper->delete();
     }
 }
