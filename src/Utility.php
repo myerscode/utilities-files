@@ -101,10 +101,10 @@ class Utility
         // if has has a extension, assume its a file
         //!empty($this->extension())
         if ($this->extension() !== '' && $this->extension() !== '0') {
-            return rtrim(dirname($this->path), '/');
+            return rtrim(dirname($this->path), DIRECTORY_SEPARATOR);
         }
 
-        return rtrim($this->path, '/');
+        return rtrim($this->path, DIRECTORY_SEPARATOR);
     }
 
     /**
