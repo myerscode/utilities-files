@@ -103,6 +103,20 @@ $file = new Utility('./src/');
 echo $file->fullyQualifiedClassname();  // App/RandomClassForTestingWith
 ```
 
+### hasAbsolutePath `bool`
+
+Does the current path have an absolute file path
+
+```php
+$file = new Utility('/src');
+
+echo $file->hasAbsolutePath();  // true
+
+$file = new Utility('~/src');
+
+echo $file->hasAbsolutePath();  // false
+```
+
 ### isDirectory `bool`
 
 Checks if the path is a directory
