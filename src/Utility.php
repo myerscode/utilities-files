@@ -249,14 +249,42 @@ class Utility
     public function touch(): Utility
     {
         if (!$this->filesystem->exists($this->path)) {
-            // if has has a extension, assume its a file
+            // if path has an extension, assume it's a file
             if (!empty($this->extension())) {
-                // ensure the directory exists before touching the file
-                $this->filesystem->mkdir(dirname($this->path));
-                $this->filesystem->touch($this->path);
+                $this->touchFile();
             } else {
-                $this->filesystem->mkdir($this->path);
+                return $this->makeDirectory();
             }
+        }
+
+        return new self($this->path);
+    }
+
+    /**
+     * Create a directory at the given filepath
+     *
+     * @return Utility
+     */
+    public function touchFile(): Utility
+    {
+        if (!$this->filesystem->exists($this->path)) {
+            // ensure the directory exists before touching the file
+            $this->filesystem->mkdir(dirname($this->path));
+            $this->filesystem->touch($this->path);
+        }
+
+        return new self($this->path);
+    }
+
+    /**
+     * Create a directory at the given filepath
+     *
+     * @return Utility
+     */
+    public function makeDirectory(): Utility
+    {
+        if (!$this->filesystem->exists($this->path)) {
+            $this->filesystem->mkdir($this->path);
         }
 
         return new self($this->path);

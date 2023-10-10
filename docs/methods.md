@@ -131,6 +131,16 @@ $file = new Utility('./src/RandomClassForTestingWith.php');
 echo $file->isDirectory();  // true
 ```
 
+### makeDirectory `Utility`
+
+Create directory if it doesn't already exist
+
+```php
+$file = new Utility('~/Code/app');
+
+echo $file->makeDirectory();
+```
+
 ### namespace `string`
 
 Get the namespace of the file (if it's a PHP file)
@@ -175,12 +185,28 @@ echo $file->appendContent('hello world');
 // hello world
 ```
 
-### touch `Utility`
+### touchFile `Utility`
 
-Touch a file or directory, to ensure it exists
+Touch a file to, ensure it exists
 
 ```php
-$file = new Utility('./src/RandomClassForTestingWith.php');
+$file = new Utility('~/Code/app.php');
 
-echo $file->namespace();  // App
+echo $file->touchFile();
+```
+
+### touch `Utility`
+
+Touch a file or directory, to ensure it exists.
+
+If the path doesn't see a file extension, a directory is assumed to be wanted.
+
+```php
+$file = new Utility('~/Code/app.php');
+
+echo $file->touch(); // file created
+
+$file = new Utility('~/Code/app');
+
+echo $file->touch(); // directory created
 ```

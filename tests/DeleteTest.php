@@ -10,7 +10,7 @@ class DeleteTest extends BaseTestSuite
 
         $helper = $this->utility($tempDirectory);
 
-        $helper->touch();
+        $helper->makeDirectory();
 
         $this->assertTrue($helper->exists());
 
@@ -25,7 +25,7 @@ class DeleteTest extends BaseTestSuite
 
         $helper = $this->utility($tempDirectory);
 
-        $helper->touch();
+        $helper->touchFile();
 
         $this->assertTrue($helper->exists());
 
