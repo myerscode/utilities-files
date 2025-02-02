@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Iterator;
 
 class HasAbsolutePathTest extends BaseTestSuite
@@ -18,10 +19,8 @@ class HasAbsolutePathTest extends BaseTestSuite
         yield 'windows - folder - Absolute 2' => ['C:\\folder', true];
     }
 
-    /**
-     * @dataProvider dataProvider
-     */
-    public function testCanAssertPathIsAbsolute(string $path, bool $isAbsolute)
+    #[DataProvider('dataProvider')]
+    public function testCanAssertPathIsAbsolute(string $path, bool $isAbsolute): void
     {
         $this->assertEquals($isAbsolute, $this->utility($path)->hasAbsolutePath());
     }

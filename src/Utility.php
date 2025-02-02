@@ -17,14 +17,8 @@ use Symfony\Component\Finder\Finder;
  */
 class Utility
 {
-    /**
-     * @var Filesystem
-     */
     private readonly Filesystem $filesystem;
 
-    /**
-     * @var Finder
-     */
     private readonly Finder $finder;
 
     private readonly string $path;
@@ -41,8 +35,6 @@ class Utility
      * Create a new instance of the files utility
      *
      * @param $path
-     *
-     * @return Utility
      */
     public static function make($path): static
     {
@@ -77,6 +69,7 @@ class Utility
         if ($this->isFile()) {
             return file_get_contents($this->path());
         }
+
         throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
     }
 
@@ -160,19 +153,7 @@ class Utility
 
     public function hasAbsolutePath(): bool
     {
-        if (
-            '/' == $this->path[0]
-            || '\\' == $this->path[0]
-            || (strlen($this->path) > 3 && ctype_alpha($this->path[0])
-                && ':' == $this->path[1]
-                && ('\\' == $this->path[2] || '/' == $this->path[2])
-            )
-            || null !== parse_url($this->path, PHP_URL_SCHEME)
-        ) {
-            return true;
-        }
-
-        return false;
+        return '/' === $this->path[0] || '\\' === $this->path[0] || strlen($this->path) > 3 && ctype_alpha($this->path[0]) && ':' === $this->path[1] && ('\\' === $this->path[2] || '/' === $this->path[2]) || null !== parse_url($this->path, PHP_URL_SCHEME);
     }
 
     /**
@@ -199,9 +180,11 @@ class Utility
         if ($withExtension) {
             return $this->fileInfo()->getFilename();
         }
-        if (empty($this->extension())) {
+
+        if (in_array($this->extension(), ['', '0'], true)) {
             return $this->fileInfo()->getFilename();
         }
+
         $fileName = $this->fileInfo()->getFilename();
         $extension = $this->extension(true);
 
@@ -267,7 +250,7 @@ class Utility
     {
         if (!$this->filesystem->exists($this->path)) {
             // if path has an extension, assume it's a file
-            if (!empty($this->extension())) {
+            if (!in_array($this->extension(), ['', '0'], true)) {
                 $this->touchFile();
             } else {
                 return $this->makeDirectory();
@@ -279,8 +262,6 @@ class Utility
 
     /**
      * Create a directory at the given filepath
-     *
-     * @return Utility
      */
     public function touchFile(): Utility
     {
@@ -295,8 +276,6 @@ class Utility
 
     /**
      * Create a directory at the given filepath
-     *
-     * @return Utility
      */
     public function makeDirectory(): Utility
     {
@@ -311,16 +290,14 @@ class Utility
      * Clean up the path for usage
      *
      * @param $path
-     *
-     * @return string
      */
     protected function cleanPath($path): string
     {
         // remove duplicate directory slashes
-        $path = preg_replace('#(\/)+#', '$1', $path);
+        $path = preg_replace('#(\/)+#', '$1', (string) $path);
 
         // change directory slash to platforms seperator
-        return preg_replace('#\/#', DIRECTORY_SEPARATOR, $path);
+        return preg_replace('#\/#', DIRECTORY_SEPARATOR, (string) $path);
     }
 
     /**
