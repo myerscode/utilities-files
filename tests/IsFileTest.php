@@ -1,28 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
-class IsFileTest extends BaseTestSuite
+final class IsFileTest extends BaseTestSuite
 {
     public function testReturnsFalseIfFileNotFound(): void
     {
         $tempFile = $this->makeTempFile();
 
-        $helper = $this->utility($tempFile);
+        $utility = $this->utility($tempFile);
 
-        $helper->delete();
+        $utility->delete();
 
-        $this->assertFalse($helper->isFile());
+        $this->assertFalse($utility->isFile());
     }
 
     public function testReturnsTrueIfPathIsAFile(): void
     {
         $tempFile = $this->makeTempFile();
 
-        $helper = $this->utility($tempFile);
+        $utility = $this->utility($tempFile);
 
-        $this->assertTrue($helper->isFile());
+        $this->assertTrue($utility->isFile());
 
-        $helper->delete();
+        $utility->delete();
     }
 }

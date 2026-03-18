@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
-class ClassNameTest extends BaseTestSuite
+final class ClassNameTest extends BaseTestSuite
 {
     public function testUtilityGetsClassNameFromFileName(): void
     {
         $utility = $this->utility($this->resourceFilePath('RandomClassForTestingWith.php'));
-        $this->assertEquals('RandomClassForTestingWith', $utility->className());
+        $this->assertSame('RandomClassForTestingWith', $utility->className());
     }
 }

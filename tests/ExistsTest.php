@@ -1,40 +1,42 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
-class ExistsTest extends BaseTestSuite
+final class ExistsTest extends BaseTestSuite
 {
     public function testUtilityCanCheckForADirectoriesExistence(): void
     {
         $tempDirectory = $this->tempDirectoryName();
 
-        $helper = $this->utility($tempDirectory);
+        $utility = $this->utility($tempDirectory);
 
-        $this->assertFalse($helper->exists());
+        $this->assertFalse($utility->exists());
 
         $this->makeTempDirectory($tempDirectory);
 
-        $this->assertTrue($helper->exists());
+        $this->assertTrue($utility->exists());
 
-        $helper->delete();
+        $utility->delete();
 
-        $this->assertFalse($helper->exists());
+        $this->assertFalse($utility->exists());
     }
 
     public function testUtilityCanCheckForAFilesExistence(): void
     {
         $tempFile = $this->tempFileName();
 
-        $helper = $this->utility($tempFile);
+        $utility = $this->utility($tempFile);
 
-        $this->assertFalse($helper->exists());
+        $this->assertFalse($utility->exists());
 
         $this->makeTempFile($tempFile);
 
-        $this->assertTrue($helper->exists());
+        $this->assertTrue($utility->exists());
 
-        $helper->delete();
+        $utility->delete();
 
-        $this->assertFalse($helper->exists());
+        $this->assertFalse($utility->exists());
     }
 }

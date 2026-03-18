@@ -1,25 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
-class MakeDirectoryTest extends BaseTestSuite
+final class MakeDirectoryTest extends BaseTestSuite
 {
     public function testUtilityCanCreateDirectoryIfItDoesNotExist(): void
     {
         $tempDirectory = $this->tempDirectoryName();
 
-        $helper = $this->utility($tempDirectory);
+        $utility = $this->utility($tempDirectory);
 
-        $this->assertFalse($helper->exists());
+        $this->assertFalse($utility->exists());
 
-        $helper->makeDirectory();
+        $utility->makeDirectory();
 
-        $this->assertTrue($helper->exists());
+        $this->assertTrue($utility->exists());
 
-        $this->assertTrue(is_dir($tempDirectory));
+        $this->assertDirectoryExists($tempDirectory);
 
-        $helper->delete();
+        $utility->delete();
 
-        $this->assertFalse($helper->exists());
+        $this->assertFalse($utility->exists());
     }
 }

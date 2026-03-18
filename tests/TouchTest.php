@@ -1,44 +1,46 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
-class TouchTest extends BaseTestSuite
+final class TouchTest extends BaseTestSuite
 {
     public function testUtilityCanCreateDirectoryIfItDoesNotExist(): void
     {
         $tempDirectory = $this->tempDirectoryName();
 
-        $helper = $this->utility($tempDirectory);
+        $utility = $this->utility($tempDirectory);
 
-        $this->assertFalse($helper->exists());
+        $this->assertFalse($utility->exists());
 
-        $helper->touch();
+        $utility->touch();
 
-        $this->assertTrue($helper->exists());
+        $this->assertTrue($utility->exists());
 
-        $this->assertTrue(is_dir($tempDirectory));
+        $this->assertDirectoryExists($tempDirectory);
 
-        $helper->delete();
+        $utility->delete();
 
-        $this->assertFalse($helper->exists());
+        $this->assertFalse($utility->exists());
     }
 
     public function testUtilityCanCreateFileIfItDoesNotExist(): void
     {
         $tempFile = $this->tempFileName();
 
-        $helper = $this->utility($tempFile);
+        $utility = $this->utility($tempFile);
 
-        $this->assertFalse($helper->exists());
+        $this->assertFalse($utility->exists());
 
-        $helper->touch();
+        $utility->touch();
 
-        $this->assertTrue($helper->exists());
+        $this->assertTrue($utility->exists());
 
         $this->assertTrue(is_file($tempFile));
 
-        $helper->delete();
+        $utility->delete();
 
-        $this->assertFalse($helper->exists());
+        $this->assertFalse($utility->exists());
     }
 }

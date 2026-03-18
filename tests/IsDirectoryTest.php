@@ -1,28 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
-class IsDirectoryTest extends BaseTestSuite
+final class IsDirectoryTest extends BaseTestSuite
 {
     public function testReturnsFalseIfDirectoryNotFound(): void
     {
         $tempFile = $this->makeTempDirectory();
 
-        $helper = $this->utility($tempFile);
+        $utility = $this->utility($tempFile);
 
-        $helper->delete();
+        $utility->delete();
 
-        $this->assertFalse($helper->isDirectory());
+        $this->assertFalse($utility->isDirectory());
     }
 
     public function testReturnsTrueIfPathIsADirectory(): void
     {
         $tempFile = $this->makeTempDirectory();
 
-        $helper = $this->utility($tempFile);
+        $utility = $this->utility($tempFile);
 
-        $this->assertTrue($helper->isDirectory());
+        $this->assertTrue($utility->isDirectory());
 
-        $helper->delete();
+        $utility->delete();
     }
 }

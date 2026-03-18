@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
-class PathTest extends BaseTestSuite
+final class PathTest extends BaseTestSuite
 {
     public function testUtilityAcceptsValidPaths(): void
     {
         $tempName = $this->tempFileName();
         $utility = $this->utility($tempName);
-        $this->assertEquals($tempName, $utility->path());
+        $this->assertSame($tempName, $utility->path());
     }
 }

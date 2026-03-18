@@ -26,14 +26,16 @@
     }
   ],
   "require": {
-    "php": "^8.4",
-    "symfony/filesystem": "^7.2",
-    "symfony/finder": "^7.2",
-    "symfony/serializer": "^7.2"
+    "php": "^8.5",
+    "symfony/filesystem": "^7.2|^8.0",
+    "symfony/finder": "^7.2|^8.0",
+    "symfony/serializer": "^7.2|^8.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "^11.5",
-    "squizlabs/php_codesniffer": "^3.0"
+    "laravel/pint": "^1.29",
+    "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^13.0",
+    "rector/rector": "^2.3"
   },
   "autoload": {
     "psr-4": {
@@ -51,8 +53,10 @@
     "sort-packages": true
   },
   "scripts": {
-    "tests": "vendor/bin/phpunit --testdox --no-coverage --colors=always",
+    "analyse": "vendor/bin/phpstan analyse",
+    "lint": "vendor/bin/pint",
+    "security-audit": "@composer audit",
     "test-coverage": "XDEBUG_MODE=coverage vendor/bin/phpunit --testdox --colors=always",
-    "phpcs": "vendor/bin/phpcs src tests --standard=PSR12"
+    "tests": "vendor/bin/phpunit --testdox --no-coverage --colors=always"
   }
 }

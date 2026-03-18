@@ -1,25 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
-class TouchFileTest extends BaseTestSuite
+final class TouchFileTest extends BaseTestSuite
 {
     public function testUtilityCanCreateFileIfItDoesNotExist(): void
     {
         $tempFile = $this->tempFileName();
 
-        $helper = $this->utility($tempFile);
+        $utility = $this->utility($tempFile);
 
-        $this->assertFalse($helper->exists());
+        $this->assertFalse($utility->exists());
 
-        $helper->touchFile();
+        $utility->touchFile();
 
-        $this->assertTrue($helper->exists());
+        $this->assertTrue($utility->exists());
 
         $this->assertTrue(is_file($tempFile));
 
-        $helper->delete();
+        $utility->delete();
 
-        $this->assertFalse($helper->exists());
+        $this->assertFalse($utility->exists());
     }
 }

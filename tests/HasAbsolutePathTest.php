@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use Iterator;
 
-class HasAbsolutePathTest extends BaseTestSuite
+final class HasAbsolutePathTest extends BaseTestSuite
 {
     public static function dataProvider(): Iterator
     {
@@ -22,6 +24,6 @@ class HasAbsolutePathTest extends BaseTestSuite
     #[DataProvider('dataProvider')]
     public function testCanAssertPathIsAbsolute(string $path, bool $isAbsolute): void
     {
-        $this->assertEquals($isAbsolute, $this->utility($path)->hasAbsolutePath());
+        $this->assertSame($isAbsolute, $this->utility($path)->hasAbsolutePath());
     }
 }

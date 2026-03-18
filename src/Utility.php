@@ -36,7 +36,7 @@ class Utility
      *
      * @param $path
      */
-    public static function make($path): static
+    public static function make(string $path): static
     {
         return new static($path);
     }
@@ -124,7 +124,7 @@ class Utility
         if ($this->isDirectory()) {
             $fileList = iterator_to_array($this->finder->files()->in($this->path)->getIterator(), false);
 
-            usort($fileList, fn($a, $b): int => strcmp($a->getRelativePathname(), $b->getRelativePathname()));
+            usort($fileList, fn ($a, $b): int => strcmp($a->getRelativePathname(), $b->getRelativePathname()));
 
             return $fileList;
         }
@@ -173,6 +173,18 @@ class Utility
     }
 
     /**
+     * Create a directory at the given filepath
+     */
+    public function makeDirectory(): Utility
+    {
+        if (!$this->filesystem->exists($this->path)) {
+            $this->filesystem->mkdir($this->path);
+        }
+
+        return new self($this->path);
+    }
+
+    /**
      * Guess the paths filename
      */
     public function name(bool $withExtension = false): string
@@ -202,6 +214,11 @@ class Utility
         if ($this->exists()) {
             if ($this->fileInfo()->getExtension() === 'php') {
                 $handle = fopen(addslashes($this->path), "r");
+
+                if ($handle === false) {
+                    throw new FileNotFoundException(sprintf('Could not open %s for reading.', $this->path));
+                }
+
                 $namespace = null;
 
                 while (($line = fgets($handle)) !== false) {
@@ -275,29 +292,17 @@ class Utility
     }
 
     /**
-     * Create a directory at the given filepath
-     */
-    public function makeDirectory(): Utility
-    {
-        if (!$this->filesystem->exists($this->path)) {
-            $this->filesystem->mkdir($this->path);
-        }
-
-        return new self($this->path);
-    }
-
-    /**
      * Clean up the path for usage
      *
      * @param $path
      */
-    protected function cleanPath($path): string
+    protected function cleanPath(string $path): string
     {
         // remove duplicate directory slashes
-        $path = preg_replace('#(\/)+#', '$1', (string) $path);
+        $path = preg_replace('#(\/)+#', '$1', $path);
 
         // change directory slash to platforms seperator
-        return preg_replace('#\/#', DIRECTORY_SEPARATOR, (string) $path);
+        return (string) preg_replace('#\/#', DIRECTORY_SEPARATOR, (string) $path);
     }
 
     /**

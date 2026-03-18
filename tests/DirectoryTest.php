@@ -1,20 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
-class DirectoryTest extends BaseTestSuite
+final class DirectoryTest extends BaseTestSuite
 {
     public function testUtilityReturnsThePathsDirectoryIfItIsAFile(): void
     {
-        $helper = $this->utility($this->resourceFilePath('RandomClassForTestingWith.php'));
+        $utility = $this->utility($this->resourceFilePath('RandomClassForTestingWith.php'));
 
-        $this->assertEquals(rtrim($this->resourceFilePath(''), DIRECTORY_SEPARATOR), $helper->directory());
+        $this->assertSame(rtrim($this->resourceFilePath(''), DIRECTORY_SEPARATOR), $utility->directory());
     }
 
     public function testUtilityReturnsThePathsFullPathIfPathIsADirectory(): void
     {
-        $helper = $this->utility($this->resourceFilePath(''));
+        $utility = $this->utility($this->resourceFilePath(''));
 
-        $this->assertEquals(rtrim($this->resourceFilePath(''), DIRECTORY_SEPARATOR), $helper->directory());
+        $this->assertSame(rtrim($this->resourceFilePath(''), DIRECTORY_SEPARATOR), $utility->directory());
     }
 }

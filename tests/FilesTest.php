@@ -1,23 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
 use Myerscode\Utilities\Files\Exceptions\NotADirectoryException;
 use Symfony\Component\Finder\SplFileInfo;
 
-class FilesTest extends BaseTestSuite
+final class FilesTest extends BaseTestSuite
 {
     public function testThrowsExceptionIfPathIsNotADirectory(): void
     {
-        $helper = $this->utility($this->resourceFilePath('RandomClassForTestingWith.php'));
+        $utility = $this->utility($this->resourceFilePath('RandomClassForTestingWith.php'));
 
         $this->expectException(NotADirectoryException::class);
-        $helper->files();
+        $utility->files();
     }
 
     public function testUtilityCanFilesInADirectory(): void
     {
-        $helper = $this->utility(__DIR__ . '/Resources/');
+        $utility = $this->utility(__DIR__ . '/Resources/');
         $expectedResult = [
             new SplFileInfo($this->resourceFilePath('RandomClassForTestingWith.php'), '', 'RandomClassForTestingWith.php'),
             new SplFileInfo($this->resourceFilePath('RandomFileForTestingWith.js'), '', 'RandomFileForTestingWith.js'),
@@ -27,6 +29,6 @@ class FilesTest extends BaseTestSuite
                 'RandomPHPFileForTestingWithoutNamespace.php'
             ),
         ];
-        $this->assertEquals($expectedResult, $helper->files());
+        $this->assertEquals($expectedResult, $utility->files());
     }
 }

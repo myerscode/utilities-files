@@ -1,26 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
 use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
 
-class AppendContentTest extends BaseTestSuite
+final class AppendContentTest extends BaseTestSuite
 {
     public function testThrowsErrorIfFileDoesNotExistWhenAppending(): void
     {
         $tempFile = $this->tempFileName();
 
-        $helper = $this->utility($tempFile);
+        $utility = $this->utility($tempFile);
         $this->expectException(FileNotFoundException::class);
-        $helper->appendContent('hello');
+        $utility->appendContent('hello');
     }
 
     public function testUtilityAppendsContentToFile(): void
     {
         $tempFile = $this->makeTempFile();
 
-        $helper = $this->utility($tempFile);
-        $this->assertEquals('hello', $helper->appendContent('hello')->content());
-        $this->assertEquals('hello world', $helper->appendContent(' world')->content());
+        $utility = $this->utility($tempFile);
+        $this->assertSame('hello', $utility->appendContent('hello')->content());
+        $this->assertSame('hello world', $utility->appendContent(' world')->content());
     }
 }

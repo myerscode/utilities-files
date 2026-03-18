@@ -1,36 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
-class DeleteTest extends BaseTestSuite
+final class DeleteTest extends BaseTestSuite
 {
     public function testUtilityCanDeleteADirectory(): void
     {
         $tempDirectory = $this->tempDirectoryName();
 
-        $helper = $this->utility($tempDirectory);
+        $utility = $this->utility($tempDirectory);
 
-        $helper->makeDirectory();
+        $utility->makeDirectory();
 
-        $this->assertTrue($helper->exists());
+        $this->assertTrue($utility->exists());
 
-        $helper->delete();
+        $utility->delete();
 
-        $this->assertFalse($helper->exists());
+        $this->assertFalse($utility->exists());
     }
 
     public function testUtilityCanDeleteAFile(): void
     {
         $tempDirectory = $this->tempFileName();
 
-        $helper = $this->utility($tempDirectory);
+        $utility = $this->utility($tempDirectory);
 
-        $helper->touchFile();
+        $utility->touchFile();
 
-        $this->assertTrue($helper->exists());
+        $this->assertTrue($utility->exists());
 
-        $helper->delete();
+        $utility->delete();
 
-        $this->assertFalse($helper->exists());
+        $this->assertFalse($utility->exists());
     }
 }
