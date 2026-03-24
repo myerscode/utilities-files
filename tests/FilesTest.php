@@ -26,7 +26,7 @@ final class FilesTest extends BaseTestSuite
             new SplFileInfo(
                 $this->resourceFilePath('RandomPHPFileForTestingWithoutNamespace.php'),
                 '',
-                'RandomPHPFileForTestingWithoutNamespace.php'
+                'RandomPHPFileForTestingWithoutNamespace.php',
             ),
         ];
         $this->assertEquals($expectedResult, $utility->files());
