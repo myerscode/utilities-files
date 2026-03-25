@@ -5,7 +5,7 @@
 [![Total Downloads](https://poser.pugx.org/myerscode/utilities-files/downloads)](https://packagist.org/packages/myerscode/utilities-files)
 [![PHP Version Require](http://poser.pugx.org/myerscode/utilities-files/require/php)](https://packagist.org/packages/myerscode/utilities-files)
 [![License](https://poser.pugx.org/myerscode/utilities-files/license)](https://packagist.org/packages/myerscode/utilities-files)
-![Tests](https://github.com/myerscode/utilities-files/workflows/tests/badge.svg?branch=main)
+[![Tests](https://github.com/myerscode/utilities-files/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/myerscode/utilities-files/actions/workflows/tests.yml)
 
 ## Requirements
 
