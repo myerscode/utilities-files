@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026.0.1] - 2026-10-31
+### New Features
+- [`c1205e7`](https://github.com/myerscode/utilities-files/commit/c1205e789d0e99f5ef27f14757b611ee6caa0f0b) - **ci**: add shared dependabot auto-merge *(PR [#7](https://github.com/myerscode/utilities-files/pull/7) by [@oniice](https://github.com/oniice))*
+
+
 ## [2026.0.0] - 2026-03-25
 ### Bug Fixes
 - [`18ff860`](https://github.com/myerscode/utilities-files/commit/18ff8605f9fc54328cd4ce63c1def4185906d677) - **tests**: skip fopen permission test on Windows *(commit by [@oniice](https://github.com/oniice))*
@@ -25,3 +30,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - [`924bb34`](https://github.com/myerscode/utilities-files/commit/924bb3478757d03eb7b493ebf8efa923070c52ce) feat(touch) added ability to touch a file or directory independently
 - [`0288f22`](https://github.com/myerscode/utilities-files/commit/0288f22a013c22dbe60a791faeb1244b57409939) Merge tag '2.0.2' into develop
 [2026.0.0]: https://github.com/myerscode/utilities-files/compare/2025.0.0...2026.0.0
+[2026.0.1]: https://github.com/myerscode/utilities-files/compare/2026.0.0...2026.0.1
