@@ -2,10 +2,13 @@
 
 namespace Myerscode\Utilities\Files;
 
-use Myerscode\Utilities\Files\Exceptions\FileFormatExpection;
+use Myerscode\Utilities\Files\Exceptions\FileFormatException;
 use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
 use Myerscode\Utilities\Files\Exceptions\InvalidFileTypeException;
 use Myerscode\Utilities\Files\Exceptions\NotADirectoryException;
+use Generator;
+use InvalidArgumentException;
+use RuntimeException;
 use SplFileInfo;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -19,26 +22,37 @@ class Utility
 {
     private readonly Filesystem $filesystem;
 
-    private readonly Finder $finder;
-
     private readonly string $path;
 
+    private readonly ?string $root;
 
-    public function __construct(string $path)
+    /**
+     * @param string|null $root Optional base directory; reads (content, files, lines, namespace) and mutating
+     *                          operations (delete, write, append, touch, makeDirectory) are refused for paths that resolve outside it.
+     *
+     * @throws InvalidArgumentException if the path uses a stream wrapper scheme other than file
+     */
+    public function __construct(string $path, ?string $root = null)
     {
+        // a scheme of 2+ chars is a stream wrapper (phar://, php://, data:, http://); 1 char is a Windows drive
+        if (preg_match('#^([a-z][a-z0-9+.\-]+):#i', $path, $m) && strtolower($m[1]) !== 'file') {
+            throw new InvalidArgumentException(sprintf('Stream wrapper "%s" paths are not allowed.', $m[1]));
+        }
+
+        $this->root = $root;
         $this->path = $this->cleanPath($path);
         $this->filesystem = new Filesystem();
-        $this->finder = new Finder();
     }
 
     /**
      * Create a new instance of the files utility
      *
      * @param $path
+     * @param string|null $root Optional base directory to confine reads and mutating operations to
      */
-    public static function make(string $path): static
+    public static function make(string $path, ?string $root = null): static
     {
-        return new static($path);
+        return new static($path, $root);
     }
 
     /**
@@ -54,20 +68,24 @@ class Utility
      */
     public function className(): string
     {
-        $directoriesAndFilename = explode(DIRECTORY_SEPARATOR, $this->path);
-        $filename = array_pop($directoriesAndFilename);
-        $nameAndExtension = explode('.', $filename);
-
-        return array_shift($nameAndExtension);
+        return $this->name();
     }
 
     /**
      * If the file exists get its content
      */
-    public function content(): bool|string
+    public function content(): string
     {
+        $this->assertWithinRoot();
+
         if ($this->isFile()) {
-            return file_get_contents($this->path());
+            $content = file_get_contents($this->path());
+
+            if ($content === false) {
+                throw new RuntimeException(sprintf('Could not read %s.', $this->path));
+            }
+
+            return $content;
         }
 
         throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
@@ -78,11 +96,13 @@ class Utility
      */
     public function delete(): Utility
     {
+        $this->assertWithinRoot();
+
         if ($this->filesystem->exists($this->path)) {
             $this->filesystem->remove($this->path);
         }
 
-        return new self($this->path);
+        return new static($this->path, $this->root);
     }
 
     /**
@@ -91,9 +111,8 @@ class Utility
      */
     public function directory(): string
     {
-        // if has has a extension, assume its a file
-        //!empty($this->extension())
-        if ($this->extension() !== '' && $this->extension() !== '0') {
+        // an existing directory wins over the extension guess (e.g. v1.2, .git)
+        if (!$this->isDirectory() && !in_array($this->extension(), ['', '0'], true)) {
             return rtrim(dirname($this->path), DIRECTORY_SEPARATOR);
         }
 
@@ -121,8 +140,10 @@ class Utility
      */
     public function files(): array
     {
+        $this->assertWithinRoot();
+
         if ($this->isDirectory()) {
-            $fileList = iterator_to_array($this->finder->files()->in($this->path)->getIterator(), false);
+            $fileList = iterator_to_array((new Finder())->files()->in($this->path)->getIterator(), false);
 
             usort($fileList, fn ($a, $b): int => strcmp($a->getRelativePathname(), $b->getRelativePathname()));
 
@@ -173,15 +194,41 @@ class Utility
     }
 
     /**
+     * Stream the file line by line without loading it all into memory; line endings are stripped
+     *
+     * @return Generator<int, string>
+     *
+     * @throws FileNotFoundException
+     */
+    public function lines(): Generator
+    {
+        $this->assertWithinRoot();
+
+        if (!$this->isFile()) {
+            throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
+        }
+
+        $handle = @fopen($this->path, 'r');
+
+        if ($handle === false) {
+            throw new RuntimeException(sprintf('Could not read %s.', $this->path));
+        }
+
+        return $this->readLines($handle);
+    }
+
+    /**
      * Create a directory at the given filepath
      */
     public function makeDirectory(): Utility
     {
+        $this->assertWithinRoot();
+
         if (!$this->filesystem->exists($this->path)) {
             $this->filesystem->mkdir($this->path);
         }
 
-        return new self($this->path);
+        return new static($this->path, $this->root);
     }
 
     /**
@@ -211,28 +258,20 @@ class Utility
      */
     public function namespace(): string
     {
+        $this->assertWithinRoot();
+
         if ($this->exists()) {
             if ($this->fileInfo()->getExtension() === 'php') {
-                $handle = fopen(addslashes($this->path), 'r');
+                $code = @file_get_contents($this->path);
 
-                if ($handle === false) {
+                if ($code === false) {
                     throw new FileNotFoundException(sprintf('Could not open %s for reading.', $this->path));
                 }
 
-                $namespace = null;
-
-                while (($line = fgets($handle)) !== false) {
-                    if (str_starts_with($line, 'namespace')) {
-                        $parts = explode(' ', $line);
-                        $namespace = rtrim(trim($parts[1]), ';');
-                        break;
-                    }
-                }
-
-                fclose($handle);
+                $namespace = $this->findNamespace($code);
 
                 if (is_null($namespace)) {
-                    throw new FileFormatExpection(sprintf('%s has no namespace', $this->path));
+                    throw new FileFormatException(sprintf('%s has no namespace', $this->path));
                 }
 
                 return $namespace;
@@ -265,6 +304,8 @@ class Utility
      */
     public function touch(): Utility
     {
+        $this->assertWithinRoot();
+
         if (!$this->filesystem->exists($this->path)) {
             // if path has an extension, assume it's a file
             if (!in_array($this->extension(), ['', '0'], true)) {
@@ -274,7 +315,7 @@ class Utility
             }
         }
 
-        return new self($this->path);
+        return new static($this->path, $this->root);
     }
 
     /**
@@ -282,13 +323,32 @@ class Utility
      */
     public function touchFile(): Utility
     {
+        $this->assertWithinRoot();
+
         if (!$this->filesystem->exists($this->path)) {
             // ensure the directory exists before touching the file
             $this->filesystem->mkdir(dirname($this->path));
             $this->filesystem->touch($this->path);
         }
 
-        return new self($this->path);
+        return new static($this->path, $this->root);
+    }
+
+    /**
+     * Throw if a root is set and the path resolves (via ../ or symlinks) outside it
+     */
+    protected function assertWithinRoot(): void
+    {
+        if ($this->root === null) {
+            return;
+        }
+
+        $root = $this->resolve($this->root);
+        $path = $this->resolve($this->path);
+
+        if ($path !== $root && !str_starts_with($path, rtrim($root, '/') . '/')) {
+            throw new InvalidArgumentException(sprintf('%s is outside the root %s.', $this->path, $this->root));
+        }
     }
 
     /**
@@ -318,12 +378,121 @@ class Utility
      */
     protected function putContent(string $content, int $flags = 0): Utility
     {
-        if ($this->isFile()) {
-            file_put_contents($this->path(), $content, $flags);
-        } else {
+        $this->assertWithinRoot();
+
+        if (!$this->isFile()) {
             throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
         }
 
-        return new self($this->path);
+        if ($flags & FILE_APPEND) {
+            if (file_put_contents($this->path(), $content, $flags | LOCK_EX) === false) {
+                throw new RuntimeException(sprintf('Could not write to %s.', $this->path));
+            }
+
+            return new static($this->path, $this->root);
+        }
+
+        // write a sibling temp file then rename over the target, so readers never see a partial file
+        $target = realpath($this->path) ?: $this->path;
+        $temp = tempnam(dirname($target), '.tmp');
+
+        if ($temp === false) {
+            // tempnam() falls back to the system temp dir instead of failing, so this needs both to be unwritable
+            // @codeCoverageIgnoreStart
+            throw new RuntimeException(sprintf('Could not write to %s.', $this->path));
+            // @codeCoverageIgnoreEnd
+        }
+
+        $written = file_put_contents($temp, $content, LOCK_EX);
+        $done = $written !== false && chmod($temp, fileperms($target) & 0777) && rename($temp, $target);
+
+        if (!$done) {
+            @unlink($temp);
+
+            throw new RuntimeException(sprintf('Could not write to %s.', $this->path));
+        }
+
+        return new static($this->path, $this->root);
+    }
+
+    /**
+     * Find the first namespace declaration in PHP source, ignoring comments, strings and `namespace\foo` operators
+     */
+    private function findNamespace(string $code): ?string
+    {
+        $tokens = token_get_all($code);
+
+        foreach ($tokens as $i => $token) {
+            if (!is_array($token) || $token[0] !== T_NAMESPACE) {
+                continue;
+            }
+
+            for ($j = $i + 1; isset($tokens[$j]); $j++) {
+                $next = $tokens[$j];
+
+                if (is_array($next) && in_array($next[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)) {
+                    continue;
+                }
+
+                if (is_array($next) && in_array($next[0], [T_STRING, T_NAME_QUALIFIED], true)) {
+                    return $next[1];
+                }
+
+                break;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param resource $handle
+     *
+     * @return Generator<int, string>
+     */
+    private function readLines($handle): Generator
+    {
+        try {
+            while (($line = fgets($handle)) !== false) {
+                yield rtrim($line, "\r\n");
+            }
+        } finally {
+            fclose($handle);
+        }
+    }
+
+    /**
+     * Absolute, normalised path (forward slashes); symlinks resolved for the deepest existing ancestor
+     */
+    private function resolve(string $path): string
+    {
+        $path = str_replace('\\', '/', $path);
+
+        if (!preg_match('#^(/|[a-z]:/)#i', $path)) {
+            $path = str_replace('\\', '/', (string) getcwd()) . '/' . $path;
+        }
+
+        $parts = [];
+        foreach (explode('/', $path) as $part) {
+            if ($part === '..') {
+                array_pop($parts);
+            } elseif ($part !== '' && $part !== '.') {
+                $parts[] = $part;
+            }
+        }
+
+        $prefix = str_starts_with($path, '/') ? '/' : '';
+        $tail = [];
+        while ($parts !== []) {
+            $candidate = $prefix . implode('/', $parts);
+            $real = realpath($candidate);
+            if ($real !== false) {
+                return rtrim(str_replace('\\', '/', $real), '/') . ($tail === [] ? '' : '/' . implode('/', $tail));
+            }
+
+            array_unshift($tail, array_pop($parts));
+        }
+
+        return $prefix . implode('/', $tail);
     }
 }

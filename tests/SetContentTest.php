@@ -5,9 +5,58 @@ declare(strict_types=1);
 namespace Tests;
 
 use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
+use PHPUnit\Framework\Attributes\RequiresOperatingSystem;
 
 final class SetContentTest extends BaseTestSuite
 {
+    #[RequiresOperatingSystem('^(Linux|Dar)')]
+    public function testSetContentKeepsPermissions(): void
+    {
+        $directory = $this->makeTempDirectory();
+        $file = $directory . DIRECTORY_SEPARATOR . 'Rupert.txt';
+        file_put_contents($file, 'Gerald');
+        chmod($file, 0640);
+
+        $this->utility($file)->setContent('Arthur');
+
+        $this->assertSame('0640', substr(sprintf('%o', fileperms($file)), -4));
+
+        unlink($file);
+        rmdir($directory);
+    }
+
+    public function testSetContentReplacesContentAndLeavesNoTempFiles(): void
+    {
+        $directory = $this->makeTempDirectory();
+        $file = $directory . DIRECTORY_SEPARATOR . 'Rupert.txt';
+        file_put_contents($file, 'Gerald');
+
+        $this->utility($file)->setContent('Arthur');
+
+        $this->assertSame('Arthur', file_get_contents($file));
+        $this->assertSame(['Rupert.txt'], array_values(array_diff(scandir($directory), ['.', '..'])));
+
+        unlink($file);
+        rmdir($directory);
+    }
+
+    public function testSetContentWritesThroughASymlink(): void
+    {
+        $directory = $this->makeTempDirectory();
+        $file = $directory . DIRECTORY_SEPARATOR . 'Gerald.txt';
+        $link = $directory . DIRECTORY_SEPARATOR . 'Rupert.txt';
+        file_put_contents($file, 'old');
+        symlink($file, $link);
+
+        $this->utility($link)->setContent('Arthur');
+
+        $this->assertTrue(is_link($link));
+        $this->assertSame('Arthur', file_get_contents($file));
+
+        unlink($link);
+        unlink($file);
+        rmdir($directory);
+    }
     public function testThrowsErrorIfFileDoesNotExistWhenAppending(): void
     {
         $tempFile = $this->tempFileName();
