@@ -6,6 +6,7 @@ use Myerscode\Utilities\Files\Exceptions\FileFormatExpection;
 use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
 use Myerscode\Utilities\Files\Exceptions\InvalidFileTypeException;
 use Myerscode\Utilities\Files\Exceptions\NotADirectoryException;
+use InvalidArgumentException;
 use SplFileInfo;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -23,9 +24,22 @@ class Utility
 
     private readonly string $path;
 
+    private readonly ?string $root;
 
-    public function __construct(string $path)
+    /**
+     * @param string|null $root Optional base directory; mutating operations (delete, write, append, touch,
+     *                          makeDirectory) are refused for paths that resolve outside it.
+     *
+     * @throws InvalidArgumentException if the path uses a stream wrapper scheme other than file
+     */
+    public function __construct(string $path, ?string $root = null)
     {
+        // a scheme of 2+ chars is a stream wrapper (phar://, php://, data:, http://); 1 char is a Windows drive
+        if (preg_match('#^([a-z][a-z0-9+.\-]+):#i', $path, $m) && strtolower($m[1]) !== 'file') {
+            throw new InvalidArgumentException(sprintf('Stream wrapper "%s" paths are not allowed.', $m[1]));
+        }
+
+        $this->root = $root;
         $this->path = $this->cleanPath($path);
         $this->filesystem = new Filesystem();
         $this->finder = new Finder();
@@ -35,10 +49,11 @@ class Utility
      * Create a new instance of the files utility
      *
      * @param $path
+     * @param string|null $root Optional base directory to confine mutating operations to
      */
-    public static function make(string $path): static
+    public static function make(string $path, ?string $root = null): static
     {
-        return new static($path);
+        return new static($path, $root);
     }
 
     /**
@@ -78,11 +93,13 @@ class Utility
      */
     public function delete(): Utility
     {
+        $this->assertWithinRoot();
+
         if ($this->filesystem->exists($this->path)) {
             $this->filesystem->remove($this->path);
         }
 
-        return new self($this->path);
+        return new self($this->path, $this->root);
     }
 
     /**
@@ -177,11 +194,13 @@ class Utility
      */
     public function makeDirectory(): Utility
     {
+        $this->assertWithinRoot();
+
         if (!$this->filesystem->exists($this->path)) {
             $this->filesystem->mkdir($this->path);
         }
 
-        return new self($this->path);
+        return new self($this->path, $this->root);
     }
 
     /**
@@ -265,6 +284,8 @@ class Utility
      */
     public function touch(): Utility
     {
+        $this->assertWithinRoot();
+
         if (!$this->filesystem->exists($this->path)) {
             // if path has an extension, assume it's a file
             if (!in_array($this->extension(), ['', '0'], true)) {
@@ -274,7 +295,7 @@ class Utility
             }
         }
 
-        return new self($this->path);
+        return new self($this->path, $this->root);
     }
 
     /**
@@ -282,13 +303,67 @@ class Utility
      */
     public function touchFile(): Utility
     {
+        $this->assertWithinRoot();
+
         if (!$this->filesystem->exists($this->path)) {
             // ensure the directory exists before touching the file
             $this->filesystem->mkdir(dirname($this->path));
             $this->filesystem->touch($this->path);
         }
 
-        return new self($this->path);
+        return new self($this->path, $this->root);
+    }
+
+    /**
+     * Throw if a root is set and the path resolves (via ../ or symlinks) outside it
+     */
+    protected function assertWithinRoot(): void
+    {
+        if ($this->root === null) {
+            return;
+        }
+
+        $root = $this->resolve($this->root);
+        $path = $this->resolve($this->path);
+
+        if ($path !== $root && !str_starts_with($path, rtrim($root, '/') . '/')) {
+            throw new InvalidArgumentException(sprintf('%s is outside the root %s.', $this->path, $this->root));
+        }
+    }
+
+    /**
+     * Absolute, normalised path (forward slashes); symlinks resolved for the deepest existing ancestor
+     */
+    private function resolve(string $path): string
+    {
+        $path = str_replace('\\', '/', $path);
+
+        if (!preg_match('#^(/|[a-z]:/)#i', $path)) {
+            $path = str_replace('\\', '/', (string) getcwd()) . '/' . $path;
+        }
+
+        $parts = [];
+        foreach (explode('/', $path) as $part) {
+            if ($part === '..') {
+                array_pop($parts);
+            } elseif ($part !== '' && $part !== '.') {
+                $parts[] = $part;
+            }
+        }
+
+        $prefix = str_starts_with($path, '/') ? '/' : '';
+        $tail = [];
+        while ($parts !== []) {
+            $candidate = $prefix . implode('/', $parts);
+            $real = realpath($candidate);
+            if ($real !== false) {
+                return rtrim(str_replace('\\', '/', $real), '/') . ($tail === [] ? '' : '/' . implode('/', $tail));
+            }
+
+            array_unshift($tail, array_pop($parts));
+        }
+
+        return $prefix . implode('/', $tail);
     }
 
     /**
@@ -318,12 +393,14 @@ class Utility
      */
     protected function putContent(string $content, int $flags = 0): Utility
     {
+        $this->assertWithinRoot();
+
         if ($this->isFile()) {
             file_put_contents($this->path(), $content, $flags);
         } else {
             throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
         }
 
-        return new self($this->path);
+        return new self($this->path, $this->root);
     }
 }
