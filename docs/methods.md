@@ -3,7 +3,7 @@
 
 ### className `string`
 
-Get the assumed PSR-4 class name for the file
+Get the assumed PSR-4 class name for the file. Same as `name()`: only the last extension is removed, so `Rupert.test.php` gives `Rupert.test`.
 
 ```php
 $file = new Utility('./src/RandomClassForTestingWith.php');
