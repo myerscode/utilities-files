@@ -165,6 +165,18 @@ $file = new Utility('./src/RandomClassForTestingWith.php');
 echo $file->namespace();  // App
 ```
 
+### lines `Generator`
+
+Stream the file one line at a time without loading it all into memory. Line endings are stripped. Throws `FileNotFoundException` straight away if the file does not exist.
+
+```php
+$file = new Utility('./logfile.txt');
+
+foreach ($file->lines() as $line) {
+    echo $line;
+}
+```
+
 ### name `string`
 
 Get the file or directory name, optionally with its extension

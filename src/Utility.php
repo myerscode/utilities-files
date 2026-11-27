@@ -6,6 +6,7 @@ use Myerscode\Utilities\Files\Exceptions\FileFormatException;
 use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
 use Myerscode\Utilities\Files\Exceptions\InvalidFileTypeException;
 use Myerscode\Utilities\Files\Exceptions\NotADirectoryException;
+use Generator;
 use InvalidArgumentException;
 use RuntimeException;
 use SplFileInfo;
@@ -222,6 +223,28 @@ class Utility
     }
 
     /**
+     * Stream the file line by line without loading it all into memory; line endings are stripped
+     *
+     * @return Generator<int, string>
+     *
+     * @throws FileNotFoundException
+     */
+    public function lines(): Generator
+    {
+        if (!$this->isFile()) {
+            throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
+        }
+
+        $handle = @fopen($this->path, 'r');
+
+        if ($handle === false) {
+            throw new RuntimeException(sprintf('Could not read %s.', $this->path));
+        }
+
+        return $this->readLines($handle);
+    }
+
+    /**
      * Get the namespace from the file (if its a PHP file)
      *
      * @throws InvalidFileTypeException
@@ -301,6 +324,22 @@ class Utility
         }
 
         return new static($this->path, $this->root);
+    }
+
+    /**
+     * @param resource $handle
+     *
+     * @return Generator<int, string>
+     */
+    private function readLines($handle): Generator
+    {
+        try {
+            while (($line = fgets($handle)) !== false) {
+                yield rtrim($line, "\r\n");
+            }
+        } finally {
+            fclose($handle);
+        }
     }
 
     /**
