@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Myerscode\Utilities\Files\Exceptions\FileFormatExpection;
 use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
 use Myerscode\Utilities\Files\Exceptions\InvalidFileTypeException;
@@ -35,5 +36,48 @@ final class NamespaceTest extends BaseTestSuite
         $utility = $this->utility($this->resourceFilePath('RandomFileForTestingWith.js'));
         $this->expectException(InvalidFileTypeException::class);
         $utility->namespace();
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function namespaceSources(): array
+    {
+        return [
+            'braces' => ["<?php\nnamespace Rupert\\Gerald {\n class A {}\n}\n", 'Rupert\\Gerald'],
+            'tab' => ["<?php\nnamespace\tRupert;\n", 'Rupert'],
+            'crlf' => ["<?php\r\nnamespace Rupert\\Arthur;\r\n", 'Rupert\\Arthur'],
+            'no space before brace' => ["<?php\nnamespace Rupert{}\n", 'Rupert'],
+            'indented' => ["<?php\n    namespace Rupert;\n", 'Rupert'],
+            'after comments' => ["<?php\n// namespace Gerald;\n/* namespace Arthur; */\nnamespace Rupert;\n", 'Rupert'],
+            'comment between' => ["<?php\nnamespace /* x */ Rupert;\n", 'Rupert'],
+            'inside docblock' => ["<?php\n/**\n * namespace Gerald;\n */\nnamespace Rupert;\n", 'Rupert'],
+        ];
+    }
+
+    #[DataProvider('namespaceSources')]
+    public function testUtilityFindsNamespaceInDifferentFormats(string $source, string $expected): void
+    {
+        $file = $this->tempFileName('.php');
+        file_put_contents($file, $source);
+
+        try {
+            $this->assertSame($expected, $this->utility($file)->namespace());
+        } finally {
+            unlink($file);
+        }
+    }
+
+    public function testUtilityIgnoresNamespaceOperatorAndComments(): void
+    {
+        $file = $this->tempFileName('.php');
+        file_put_contents($file, "<?php\n// namespace Gerald;\n\$a = namespace\\Rupert\\foo();\n");
+
+        try {
+            $this->expectException(FileFormatExpection::class);
+            $this->utility($file)->namespace();
+        } finally {
+            unlink($file);
+        }
     }
 }

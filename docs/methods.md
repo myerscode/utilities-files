@@ -157,7 +157,7 @@ echo $file->makeDirectory();
 
 ### namespace `string`
 
-Get the namespace of the file (if it's a PHP file)
+Get the namespace of the file (if it's a PHP file). The file is tokenised, so braced namespaces, tabs, CRLF line endings and commented-out declarations are handled. Throws `FileFormatExpection` when no namespace is declared.
 
 ```php
 $file = new Utility('./src/RandomClassForTestingWith.php');

@@ -236,23 +236,13 @@ class Utility
     {
         if ($this->exists()) {
             if ($this->fileInfo()->getExtension() === 'php') {
-                $handle = fopen($this->path, 'r');
+                $code = @file_get_contents($this->path);
 
-                if ($handle === false) {
+                if ($code === false) {
                     throw new FileNotFoundException(sprintf('Could not open %s for reading.', $this->path));
                 }
 
-                $namespace = null;
-
-                while (($line = fgets($handle)) !== false) {
-                    if (str_starts_with($line, 'namespace')) {
-                        $parts = explode(' ', $line);
-                        $namespace = rtrim(trim($parts[1]), ';');
-                        break;
-                    }
-                }
-
-                fclose($handle);
+                $namespace = $this->findNamespace($code);
 
                 if (is_null($namespace)) {
                     throw new FileFormatExpection(sprintf('%s has no namespace', $this->path));
@@ -316,6 +306,36 @@ class Utility
         }
 
         return new self($this->path, $this->root);
+    }
+
+    /**
+     * Find the first namespace declaration in PHP source, ignoring comments, strings and `namespace\foo` operators
+     */
+    private function findNamespace(string $code): ?string
+    {
+        $tokens = token_get_all($code);
+
+        foreach ($tokens as $i => $token) {
+            if (!is_array($token) || $token[0] !== T_NAMESPACE) {
+                continue;
+            }
+
+            for ($j = $i + 1; isset($tokens[$j]); $j++) {
+                $next = $tokens[$j];
+
+                if (is_array($next) && in_array($next[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)) {
+                    continue;
+                }
+
+                if (is_array($next) && in_array($next[0], [T_STRING, T_NAME_QUALIFIED], true)) {
+                    return $next[1];
+                }
+
+                break;
+            }
+        }
+
+        return null;
     }
 
     /**
