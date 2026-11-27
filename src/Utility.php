@@ -21,8 +21,6 @@ class Utility
 {
     private readonly Filesystem $filesystem;
 
-    private readonly Finder $finder;
-
     private readonly string $path;
 
     private readonly ?string $root;
@@ -43,7 +41,6 @@ class Utility
         $this->root = $root;
         $this->path = $this->cleanPath($path);
         $this->filesystem = new Filesystem();
-        $this->finder = new Finder();
     }
 
     /**
@@ -146,7 +143,7 @@ class Utility
     public function files(): array
     {
         if ($this->isDirectory()) {
-            $fileList = iterator_to_array($this->finder->files()->in($this->path)->getIterator(), false);
+            $fileList = iterator_to_array((new Finder())->files()->in($this->path)->getIterator(), false);
 
             usort($fileList, fn ($a, $b): int => strcmp($a->getRelativePathname(), $b->getRelativePathname()));
 
