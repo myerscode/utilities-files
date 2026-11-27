@@ -99,7 +99,7 @@ class Utility
             $this->filesystem->remove($this->path);
         }
 
-        return new self($this->path, $this->root);
+        return new static($this->path, $this->root);
     }
 
     /**
@@ -199,7 +199,7 @@ class Utility
             $this->filesystem->mkdir($this->path);
         }
 
-        return new self($this->path, $this->root);
+        return new static($this->path, $this->root);
     }
 
     /**
@@ -284,7 +284,7 @@ class Utility
             }
         }
 
-        return new self($this->path, $this->root);
+        return new static($this->path, $this->root);
     }
 
     /**
@@ -300,7 +300,7 @@ class Utility
             $this->filesystem->touch($this->path);
         }
 
-        return new self($this->path, $this->root);
+        return new static($this->path, $this->root);
     }
 
     /**
@@ -423,7 +423,7 @@ class Utility
                 throw new RuntimeException(sprintf('Could not write to %s.', $this->path));
             }
 
-            return new self($this->path, $this->root);
+            return new static($this->path, $this->root);
         }
 
         // write a sibling temp file then rename over the target, so readers never see a partial file
@@ -443,6 +443,6 @@ class Utility
             throw new RuntimeException(sprintf('Could not write to %s.', $this->path));
         }
 
-        return new self($this->path, $this->root);
+        return new static($this->path, $this->root);
     }
 }
