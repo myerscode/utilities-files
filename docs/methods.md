@@ -190,7 +190,9 @@ echo $file->path();  // ./src/RandomClassForTestingWith.php
 
 ### setContent `Utility`
 
-If the path is a file and if it exists, sets the content of the file
+If the path is a file and if it exists, sets the content of the file.
+
+The write is atomic: content goes to a temporary file in the same directory, which is then renamed over the original, so readers never see a partial file. Permissions are preserved and symlinks are written through. `appendContent` writes in place under an exclusive lock.
 
 ```php
 $file = new Utility('./logfile.txt');

@@ -399,12 +399,33 @@ class Utility
     {
         $this->assertWithinRoot();
 
-        if ($this->isFile()) {
+        if (!$this->isFile()) {
+            throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
+        }
+
+        if ($flags & FILE_APPEND) {
             if (file_put_contents($this->path(), $content, $flags | LOCK_EX) === false) {
                 throw new RuntimeException(sprintf('Could not write to %s.', $this->path));
             }
-        } else {
-            throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
+
+            return new self($this->path, $this->root);
+        }
+
+        // write a sibling temp file then rename over the target, so readers never see a partial file
+        $target = realpath($this->path) ?: $this->path;
+        $temp = tempnam(dirname($target), '.tmp');
+
+        if ($temp === false) {
+            throw new RuntimeException(sprintf('Could not write to %s.', $this->path));
+        }
+
+        $written = file_put_contents($temp, $content, LOCK_EX);
+        $done = $written !== false && chmod($temp, fileperms($target) & 0777) && rename($temp, $target);
+
+        if (!$done) {
+            @unlink($temp);
+
+            throw new RuntimeException(sprintf('Could not write to %s.', $this->path));
         }
 
         return new self($this->path, $this->root);
