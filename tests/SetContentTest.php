@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Tests;
 
 use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
+use PHPUnit\Framework\Attributes\RequiresOperatingSystem;
 
 final class SetContentTest extends BaseTestSuite
 {
-    public function testSetContentKeepsPermissionsAndLeavesNoTempFiles(): void
+    #[RequiresOperatingSystem('^(Linux|Dar)')]
+    public function testSetContentKeepsPermissions(): void
     {
         $directory = $this->makeTempDirectory();
         $file = $directory . DIRECTORY_SEPARATOR . 'Rupert.txt';
@@ -17,8 +19,21 @@ final class SetContentTest extends BaseTestSuite
 
         $this->utility($file)->setContent('Arthur');
 
-        $this->assertSame('Arthur', file_get_contents($file));
         $this->assertSame('0640', substr(sprintf('%o', fileperms($file)), -4));
+
+        unlink($file);
+        rmdir($directory);
+    }
+
+    public function testSetContentReplacesContentAndLeavesNoTempFiles(): void
+    {
+        $directory = $this->makeTempDirectory();
+        $file = $directory . DIRECTORY_SEPARATOR . 'Rupert.txt';
+        file_put_contents($file, 'Gerald');
+
+        $this->utility($file)->setContent('Arthur');
+
+        $this->assertSame('Arthur', file_get_contents($file));
         $this->assertSame(['Rupert.txt'], array_values(array_diff(scandir($directory), ['.', '..'])));
 
         unlink($file);
