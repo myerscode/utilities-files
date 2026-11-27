@@ -232,7 +232,7 @@ class Utility
     {
         if ($this->exists()) {
             if ($this->fileInfo()->getExtension() === 'php') {
-                $handle = fopen(addslashes($this->path), 'r');
+                $handle = fopen($this->path, 'r');
 
                 if ($handle === false) {
                     throw new FileNotFoundException(sprintf('Could not open %s for reading.', $this->path));
