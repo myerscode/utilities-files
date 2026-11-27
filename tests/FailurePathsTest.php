@@ -105,6 +105,12 @@ final class FailurePathsTest extends BaseTestSuite
         $this->assertSame('Gerald', (new Utility($file))->namespace());
     }
 
+    public function testPathWithNoExistingAncestorIsRefusedOutsideRoot(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        (new Utility('/Rupert/Gerald/Arthur.txt', $this->directory))->touchFile();
+    }
+
     public function testRelativePathsAreConfinedToRelativeRoot(): void
     {
         file_put_contents($this->directory . '/Rupert.txt', 'Gerald');
