@@ -194,6 +194,30 @@ class Utility
     }
 
     /**
+     * Stream the file line by line without loading it all into memory; line endings are stripped
+     *
+     * @return Generator<int, string>
+     *
+     * @throws FileNotFoundException
+     */
+    public function lines(): Generator
+    {
+        $this->assertWithinRoot();
+
+        if (!$this->isFile()) {
+            throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
+        }
+
+        $handle = @fopen($this->path, 'r');
+
+        if ($handle === false) {
+            throw new RuntimeException(sprintf('Could not read %s.', $this->path));
+        }
+
+        return $this->readLines($handle);
+    }
+
+    /**
      * Create a directory at the given filepath
      */
     public function makeDirectory(): Utility
@@ -224,30 +248,6 @@ class Utility
         $extension = $this->extension(true);
 
         return substr($fileName, 0, strlen($fileName) - strlen($extension));
-    }
-
-    /**
-     * Stream the file line by line without loading it all into memory; line endings are stripped
-     *
-     * @return Generator<int, string>
-     *
-     * @throws FileNotFoundException
-     */
-    public function lines(): Generator
-    {
-        $this->assertWithinRoot();
-
-        if (!$this->isFile()) {
-            throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
-        }
-
-        $handle = @fopen($this->path, 'r');
-
-        if ($handle === false) {
-            throw new RuntimeException(sprintf('Could not read %s.', $this->path));
-        }
-
-        return $this->readLines($handle);
     }
 
     /**
@@ -335,52 +335,6 @@ class Utility
     }
 
     /**
-     * @param resource $handle
-     *
-     * @return Generator<int, string>
-     */
-    private function readLines($handle): Generator
-    {
-        try {
-            while (($line = fgets($handle)) !== false) {
-                yield rtrim($line, "\r\n");
-            }
-        } finally {
-            fclose($handle);
-        }
-    }
-
-    /**
-     * Find the first namespace declaration in PHP source, ignoring comments, strings and `namespace\foo` operators
-     */
-    private function findNamespace(string $code): ?string
-    {
-        $tokens = token_get_all($code);
-
-        foreach ($tokens as $i => $token) {
-            if (!is_array($token) || $token[0] !== T_NAMESPACE) {
-                continue;
-            }
-
-            for ($j = $i + 1; isset($tokens[$j]); $j++) {
-                $next = $tokens[$j];
-
-                if (is_array($next) && in_array($next[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)) {
-                    continue;
-                }
-
-                if (is_array($next) && in_array($next[0], [T_STRING, T_NAME_QUALIFIED], true)) {
-                    return $next[1];
-                }
-
-                break;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Throw if a root is set and the path resolves (via ../ or symlinks) outside it
      */
     protected function assertWithinRoot(): void
@@ -395,41 +349,6 @@ class Utility
         if ($path !== $root && !str_starts_with($path, rtrim($root, '/') . '/')) {
             throw new InvalidArgumentException(sprintf('%s is outside the root %s.', $this->path, $this->root));
         }
-    }
-
-    /**
-     * Absolute, normalised path (forward slashes); symlinks resolved for the deepest existing ancestor
-     */
-    private function resolve(string $path): string
-    {
-        $path = str_replace('\\', '/', $path);
-
-        if (!preg_match('#^(/|[a-z]:/)#i', $path)) {
-            $path = str_replace('\\', '/', (string) getcwd()) . '/' . $path;
-        }
-
-        $parts = [];
-        foreach (explode('/', $path) as $part) {
-            if ($part === '..') {
-                array_pop($parts);
-            } elseif ($part !== '' && $part !== '.') {
-                $parts[] = $part;
-            }
-        }
-
-        $prefix = str_starts_with($path, '/') ? '/' : '';
-        $tail = [];
-        while ($parts !== []) {
-            $candidate = $prefix . implode('/', $parts);
-            $real = realpath($candidate);
-            if ($real !== false) {
-                return rtrim(str_replace('\\', '/', $real), '/') . ($tail === [] ? '' : '/' . implode('/', $tail));
-            }
-
-            array_unshift($tail, array_pop($parts));
-        }
-
-        return $prefix . implode('/', $tail);
     }
 
     /**
@@ -491,5 +410,86 @@ class Utility
         }
 
         return new static($this->path, $this->root);
+    }
+
+    /**
+     * Find the first namespace declaration in PHP source, ignoring comments, strings and `namespace\foo` operators
+     */
+    private function findNamespace(string $code): ?string
+    {
+        $tokens = token_get_all($code);
+
+        foreach ($tokens as $i => $token) {
+            if (!is_array($token) || $token[0] !== T_NAMESPACE) {
+                continue;
+            }
+
+            for ($j = $i + 1; isset($tokens[$j]); $j++) {
+                $next = $tokens[$j];
+
+                if (is_array($next) && in_array($next[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)) {
+                    continue;
+                }
+
+                if (is_array($next) && in_array($next[0], [T_STRING, T_NAME_QUALIFIED], true)) {
+                    return $next[1];
+                }
+
+                break;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param resource $handle
+     *
+     * @return Generator<int, string>
+     */
+    private function readLines($handle): Generator
+    {
+        try {
+            while (($line = fgets($handle)) !== false) {
+                yield rtrim($line, "\r\n");
+            }
+        } finally {
+            fclose($handle);
+        }
+    }
+
+    /**
+     * Absolute, normalised path (forward slashes); symlinks resolved for the deepest existing ancestor
+     */
+    private function resolve(string $path): string
+    {
+        $path = str_replace('\\', '/', $path);
+
+        if (!preg_match('#^(/|[a-z]:/)#i', $path)) {
+            $path = str_replace('\\', '/', (string) getcwd()) . '/' . $path;
+        }
+
+        $parts = [];
+        foreach (explode('/', $path) as $part) {
+            if ($part === '..') {
+                array_pop($parts);
+            } elseif ($part !== '' && $part !== '.') {
+                $parts[] = $part;
+            }
+        }
+
+        $prefix = str_starts_with($path, '/') ? '/' : '';
+        $tail = [];
+        while ($parts !== []) {
+            $candidate = $prefix . implode('/', $parts);
+            $real = realpath($candidate);
+            if ($real !== false) {
+                return rtrim(str_replace('\\', '/', $real), '/') . ($tail === [] ? '' : '/' . implode('/', $tail));
+            }
+
+            array_unshift($tail, array_pop($parts));
+        }
+
+        return $prefix . implode('/', $tail);
     }
 }

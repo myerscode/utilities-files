@@ -10,9 +10,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 final class RootReadTest extends BaseTestSuite
 {
-    private string $root = '';
-
     private string $outside = '';
+    private string $root = '';
 
     protected function setUp(): void
     {

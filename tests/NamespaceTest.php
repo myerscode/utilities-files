@@ -11,33 +11,6 @@ use Myerscode\Utilities\Files\Exceptions\InvalidFileTypeException;
 
 final class NamespaceTest extends BaseTestSuite
 {
-    public function testUtilityCanFindPHPNamespace(): void
-    {
-        $utility = $this->utility($this->resourceFilePath('RandomClassForTestingWith.php'));
-        $this->assertSame('Tests\Resources', $utility->namespace());
-    }
-
-    public function testUtilityThrowsErrorIfFileDoesNotHaveANamespace(): void
-    {
-        $utility = $this->utility($this->resourceFilePath('RandomPHPFileForTestingWithoutNamespace.php'));
-        $this->expectException(FileFormatException::class);
-        $utility->namespace();
-    }
-
-    public function testUtilityThrowsErrorIfFileIsNotFound(): void
-    {
-        $utility = $this->utility($this->resourceFilePath('RandomFileForTestingWith.whoops'));
-        $this->expectException(FileNotFoundException::class);
-        $utility->namespace();
-    }
-
-    public function testUtilityThrowsErrorIfFileIsNotPHP(): void
-    {
-        $utility = $this->utility($this->resourceFilePath('RandomFileForTestingWith.js'));
-        $this->expectException(InvalidFileTypeException::class);
-        $utility->namespace();
-    }
-
     /**
      * @return array<string, array{string, string}>
      */
@@ -53,6 +26,23 @@ final class NamespaceTest extends BaseTestSuite
             'comment between' => ["<?php\nnamespace /* x */ Rupert;\n", 'Rupert'],
             'inside docblock' => ["<?php\n/**\n * namespace Gerald;\n */\nnamespace Rupert;\n", 'Rupert'],
         ];
+    }
+
+    public function testMissingNamespaceIsStillCatchableAsTheDeprecatedMisspeltException(): void
+    {
+        $utility = $this->utility($this->resourceFilePath('RandomPHPFileForTestingWithoutNamespace.php'));
+
+        try {
+            $utility->namespace();
+            $this->fail('Expected an exception');
+        } catch (\Myerscode\Utilities\Files\Exceptions\FileFormatExpection $exception) {
+            $this->assertInstanceOf(FileFormatException::class, $exception);
+        }
+    }
+    public function testUtilityCanFindPHPNamespace(): void
+    {
+        $utility = $this->utility($this->resourceFilePath('RandomClassForTestingWith.php'));
+        $this->assertSame('Tests\Resources', $utility->namespace());
     }
 
     #[DataProvider('namespaceSources')]
@@ -81,15 +71,24 @@ final class NamespaceTest extends BaseTestSuite
         }
     }
 
-    public function testMissingNamespaceIsStillCatchableAsTheDeprecatedMisspeltException(): void
+    public function testUtilityThrowsErrorIfFileDoesNotHaveANamespace(): void
     {
         $utility = $this->utility($this->resourceFilePath('RandomPHPFileForTestingWithoutNamespace.php'));
+        $this->expectException(FileFormatException::class);
+        $utility->namespace();
+    }
 
-        try {
-            $utility->namespace();
-            $this->fail('Expected an exception');
-        } catch (\Myerscode\Utilities\Files\Exceptions\FileFormatExpection $exception) {
-            $this->assertInstanceOf(FileFormatException::class, $exception);
-        }
+    public function testUtilityThrowsErrorIfFileIsNotFound(): void
+    {
+        $utility = $this->utility($this->resourceFilePath('RandomFileForTestingWith.whoops'));
+        $this->expectException(FileNotFoundException::class);
+        $utility->namespace();
+    }
+
+    public function testUtilityThrowsErrorIfFileIsNotPHP(): void
+    {
+        $utility = $this->utility($this->resourceFilePath('RandomFileForTestingWith.js'));
+        $this->expectException(InvalidFileTypeException::class);
+        $utility->namespace();
     }
 }
