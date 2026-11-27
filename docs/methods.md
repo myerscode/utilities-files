@@ -3,9 +3,16 @@
 
 ### className `string`
 
-Get the assumed PRS4 class name for the file
+Get the assumed PSR-4 class name for the file
 
-### content `appendContent`
+```php
+$file = new Utility('./src/RandomClassForTestingWith.php');
+
+echo $file->className();
+// RandomClassForTestingWith
+```
+
+### appendContent `Utility`
 
 If the path is a file and if it exists, appends content to the end of the file 
 
@@ -14,13 +21,6 @@ $file = new Utility('./logfile.txt');
 
 echo $file->appendContent('hello world');
 // ... hello world
-```
-
-```php
-$file = new Utility('./src/RandomClassForTestingWith.php');
-
-echo $file->className();
-// RandomClassForTestingWith
 ```
 
 ### content `string`
@@ -65,14 +65,14 @@ Does the file or directory actually exists
 ```php
 $file = new Utility('./src/RandomClassForTestingWith.php');
 
-echo $file->exits(); // true
+echo $file->exists(); // true
 $file->delete();
-echo $file->exits(); // false
+echo $file->exists(); // false
 ```
 
 ### extension `string`
 
-Does the file or directory actually exists
+Guess the path's file extension
 
 ```php
 $file = new Utility('./src/RandomClassForTestingWith.php');
@@ -80,7 +80,7 @@ $file = new Utility('./src/RandomClassForTestingWith.php');
 echo $file->extension(); // php
 
 // get with dot prefix
-echo $file->exits(true); // .php
+echo $file->extension(true); // .php
 ```
 
 ### files `array`
@@ -138,11 +138,11 @@ Checks if the path is a file
 ```php
 $file = new Utility('./src/');
 
-echo $file->isDirectory();  // false
+echo $file->isFile();  // false
 
 $file = new Utility('./src/RandomClassForTestingWith.php');
 
-echo $file->isDirectory();  // true
+echo $file->isFile();  // true
 ```
 
 ### makeDirectory `Utility`
@@ -167,7 +167,7 @@ echo $file->namespace();  // App
 
 ### name `string`
 
-Does the file or directory actually exists
+Get the file or directory name, optionally with its extension
 
 ```php
 $file = new Utility('./src/RandomClassForTestingWith.php');
@@ -188,14 +188,14 @@ $file = new Utility('./src/RandomClassForTestingWith.php');
 echo $file->path();  // ./src/RandomClassForTestingWith.php
 ```
 
-### content `setContent`
+### setContent `Utility`
 
 If the path is a file and if it exists, sets the content of the file
 
 ```php
 $file = new Utility('./logfile.txt');
 
-echo $file->appendContent('hello world');
+echo $file->setContent('hello world');
 // hello world
 ```
 
@@ -224,3 +224,8 @@ $file = new Utility('~/Code/app');
 
 echo $file->touch(); // directory created
 ```
+
+## Security
+
+- Pass a `$root` as the second constructor argument (`new Utility($path, $root)`) to confine mutating operations (`delete`, `setContent`, `appendContent`, `touch`, `touchFile`, `makeDirectory`). Paths that resolve outside `$root` are refused. Without a `$root`, no confinement applies, so never build paths from untrusted input without one.
+- Stream wrapper paths such as `phar://`, `php://`, `data:` and `http://` are rejected with an `InvalidArgumentException`. Only plain paths and `file:` are accepted.
