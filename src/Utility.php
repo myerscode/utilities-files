@@ -27,8 +27,8 @@ class Utility
     private readonly ?string $root;
 
     /**
-     * @param string|null $root Optional base directory; mutating operations (delete, write, append, touch,
-     *                          makeDirectory) are refused for paths that resolve outside it.
+     * @param string|null $root Optional base directory; reads (content, files, lines, namespace) and mutating
+     *                          operations (delete, write, append, touch, makeDirectory) are refused for paths that resolve outside it.
      *
      * @throws InvalidArgumentException if the path uses a stream wrapper scheme other than file
      */
@@ -48,7 +48,7 @@ class Utility
      * Create a new instance of the files utility
      *
      * @param $path
-     * @param string|null $root Optional base directory to confine mutating operations to
+     * @param string|null $root Optional base directory to confine reads and mutating operations to
      */
     public static function make(string $path, ?string $root = null): static
     {
@@ -76,6 +76,8 @@ class Utility
      */
     public function content(): string
     {
+        $this->assertWithinRoot();
+
         if ($this->isFile()) {
             $content = file_get_contents($this->path());
 
@@ -138,6 +140,8 @@ class Utility
      */
     public function files(): array
     {
+        $this->assertWithinRoot();
+
         if ($this->isDirectory()) {
             $fileList = iterator_to_array((new Finder())->files()->in($this->path)->getIterator(), false);
 
@@ -231,6 +235,8 @@ class Utility
      */
     public function lines(): Generator
     {
+        $this->assertWithinRoot();
+
         if (!$this->isFile()) {
             throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
         }
@@ -252,6 +258,8 @@ class Utility
      */
     public function namespace(): string
     {
+        $this->assertWithinRoot();
+
         if ($this->exists()) {
             if ($this->fileInfo()->getExtension() === 'php') {
                 $code = @file_get_contents($this->path);

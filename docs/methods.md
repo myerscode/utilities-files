@@ -241,5 +241,5 @@ echo $file->touch(); // directory created
 
 ## Security
 
-- Pass a `$root` as the second constructor argument (`new Utility($path, $root)`) to confine mutating operations (`delete`, `setContent`, `appendContent`, `touch`, `touchFile`, `makeDirectory`). Paths that resolve outside `$root` are refused. Without a `$root`, no confinement applies, so never build paths from untrusted input without one.
+- Pass a `$root` as the second constructor argument (`new Utility($path, $root)`) to confine reads (`content`, `namespace`, `lines`, `files`) and mutating operations (`delete`, `setContent`, `appendContent`, `touch`, `touchFile`, `makeDirectory`). Paths that resolve outside `$root` are refused. Without a `$root`, no confinement applies, so never build paths from untrusted input without one.
 - Stream wrapper paths such as `phar://`, `php://`, `data:` and `http://` are rejected with an `InvalidArgumentException`. Only plain paths and `file:` are accepted.
