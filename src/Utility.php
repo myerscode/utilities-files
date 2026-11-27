@@ -108,9 +108,8 @@ class Utility
      */
     public function directory(): string
     {
-        // if has has a extension, assume its a file
-        //!empty($this->extension())
-        if ($this->extension() !== '' && $this->extension() !== '0') {
+        // an existing directory wins over the extension guess (e.g. v1.2, .git)
+        if (!$this->isDirectory() && !in_array($this->extension(), ['', '0'], true)) {
             return rtrim(dirname($this->path), DIRECTORY_SEPARATOR);
         }
 

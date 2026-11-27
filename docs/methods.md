@@ -46,7 +46,7 @@ $file->delete();
 
 ### directory `Utility`
 
-Get the directory of the path
+Get the directory of the path. A path that exists as a directory is always returned as is, even if its name has a dot (`v1.2`, `.git`); for paths that do not exist, an extension means a file.
 
 ```php
 $file = new Utility('./src/RandomClassForTestingWith.php');
@@ -215,7 +215,7 @@ echo $file->touchFile();
 
 Touch a file or directory, to ensure it exists.
 
-If the path doesn't see a file extension, a directory is assumed to be wanted.
+If the path doesn't exist and has no file extension, a directory is assumed to be wanted. A path that already exists is left untouched.
 
 ```php
 $file = new Utility('~/Code/app.php');
