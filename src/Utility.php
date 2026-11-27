@@ -397,7 +397,10 @@ class Utility
         $temp = tempnam(dirname($target), '.tmp');
 
         if ($temp === false) {
+            // tempnam() falls back to the system temp dir instead of failing, so this needs both to be unwritable
+            // @codeCoverageIgnoreStart
             throw new RuntimeException(sprintf('Could not write to %s.', $this->path));
+            // @codeCoverageIgnoreEnd
         }
 
         $written = file_put_contents($temp, $content, LOCK_EX);
