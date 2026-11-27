@@ -403,7 +403,9 @@ class Utility
         $this->assertWithinRoot();
 
         if ($this->isFile()) {
-            file_put_contents($this->path(), $content, $flags);
+            if (file_put_contents($this->path(), $content, $flags | LOCK_EX) === false) {
+                throw new RuntimeException(sprintf('Could not write to %s.', $this->path));
+            }
         } else {
             throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
         }
