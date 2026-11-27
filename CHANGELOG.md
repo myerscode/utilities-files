@@ -6,12 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [2026.1.0] - 2026-11-27
 ### Bug Fixes
-- [`108244e`](https://github.com/myerscode/utilities-files/commit/108244e361994502ab149d568bc440c88a87deb4) - harden file access, add lines() and root confinement *(PR [#13](https://github.com/myerscode/utilities-files/pull/13) by [@oniice](https://github.com/oniice))*
+- [`17821f7`](https://github.com/myerscode/utilities-files/commit/17821f7c6a0558383140fc0b2a8f5f5a2a747116) - harden file access, add lines() and root confinement *(PR [#13](https://github.com/myerscode/utilities-files/pull/13) by [@oniice](https://github.com/oniice))*
 
 
 ## [2026.0.1] - 2026-10-31
 ### New Features
-- [`c1205e7`](https://github.com/myerscode/utilities-files/commit/c1205e789d0e99f5ef27f14757b611ee6caa0f0b) - **ci**: add shared dependabot auto-merge *(PR [#7](https://github.com/myerscode/utilities-files/pull/7) by [@oniice](https://github.com/oniice))*
+- [`e6c5a83`](https://github.com/myerscode/utilities-files/commit/e6c5a839114773e54a4a45dc273033d3b98c0125) - **ci**: add shared dependabot auto-merge *(PR [#7](https://github.com/myerscode/utilities-files/pull/7) by [@oniice](https://github.com/oniice))*
 
 
 ## [2026.0.0] - 2026-03-25
