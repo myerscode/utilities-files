@@ -7,6 +7,7 @@ use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
 use Myerscode\Utilities\Files\Exceptions\InvalidFileTypeException;
 use Myerscode\Utilities\Files\Exceptions\NotADirectoryException;
 use InvalidArgumentException;
+use RuntimeException;
 use SplFileInfo;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -79,10 +80,16 @@ class Utility
     /**
      * If the file exists get its content
      */
-    public function content(): bool|string
+    public function content(): string
     {
         if ($this->isFile()) {
-            return file_get_contents($this->path());
+            $content = file_get_contents($this->path());
+
+            if ($content === false) {
+                throw new RuntimeException(sprintf('Could not read %s.', $this->path));
+            }
+
+            return $content;
         }
 
         throw new FileNotFoundException(sprintf('%s does not exist.', $this->path));
