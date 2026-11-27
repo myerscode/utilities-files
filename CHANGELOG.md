@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026.1.0] - 2026-11-27
+### Bug Fixes
+- [`108244e`](https://github.com/myerscode/utilities-files/commit/108244e361994502ab149d568bc440c88a87deb4) - harden file access, add lines() and root confinement *(PR [#13](https://github.com/myerscode/utilities-files/pull/13) by [@oniice](https://github.com/oniice))*
+
+
 ## [2026.0.1] - 2026-10-31
 ### New Features
 - [`c1205e7`](https://github.com/myerscode/utilities-files/commit/c1205e789d0e99f5ef27f14757b611ee6caa0f0b) - **ci**: add shared dependabot auto-merge *(PR [#7](https://github.com/myerscode/utilities-files/pull/7) by [@oniice](https://github.com/oniice))*
@@ -31,3 +36,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - [`0288f22`](https://github.com/myerscode/utilities-files/commit/0288f22a013c22dbe60a791faeb1244b57409939) Merge tag '2.0.2' into develop
 [2026.0.0]: https://github.com/myerscode/utilities-files/compare/2025.0.0...2026.0.0
 [2026.0.1]: https://github.com/myerscode/utilities-files/compare/2026.0.0...2026.0.1
+[2026.1.0]: https://github.com/myerscode/utilities-files/compare/2026.0.1...2026.1.0
