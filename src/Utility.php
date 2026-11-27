@@ -2,7 +2,7 @@
 
 namespace Myerscode\Utilities\Files;
 
-use Myerscode\Utilities\Files\Exceptions\FileFormatExpection;
+use Myerscode\Utilities\Files\Exceptions\FileFormatException;
 use Myerscode\Utilities\Files\Exceptions\FileNotFoundException;
 use Myerscode\Utilities\Files\Exceptions\InvalidFileTypeException;
 use Myerscode\Utilities\Files\Exceptions\NotADirectoryException;
@@ -240,7 +240,7 @@ class Utility
                 $namespace = $this->findNamespace($code);
 
                 if (is_null($namespace)) {
-                    throw new FileFormatExpection(sprintf('%s has no namespace', $this->path));
+                    throw new FileFormatException(sprintf('%s has no namespace', $this->path));
                 }
 
                 return $namespace;

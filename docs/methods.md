@@ -157,7 +157,7 @@ echo $file->makeDirectory();
 
 ### namespace `string`
 
-Get the namespace of the file (if it's a PHP file). The file is tokenised, so braced namespaces, tabs, CRLF line endings and commented-out declarations are handled. Throws `FileFormatExpection` when no namespace is declared.
+Get the namespace of the file (if it's a PHP file). The file is tokenised, so braced namespaces, tabs, CRLF line endings and commented-out declarations are handled. Throws `FileFormatException` when no namespace is declared. The old misspelt `FileFormatExpection` is deprecated but remains its parent class, so existing catch blocks keep working.
 
 ```php
 $file = new Utility('./src/RandomClassForTestingWith.php');
