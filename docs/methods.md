@@ -3,9 +3,16 @@
 
 ### className `string`
 
-Get the assumed PRS4 class name for the file
+Get the assumed PSR-4 class name for the file. Same as `name()`: only the last extension is removed, so `Rupert.test.php` gives `Rupert.test`.
 
-### content `appendContent`
+```php
+$file = new Utility('./src/RandomClassForTestingWith.php');
+
+echo $file->className();
+// RandomClassForTestingWith
+```
+
+### appendContent `Utility`
 
 If the path is a file and if it exists, appends content to the end of the file 
 
@@ -14,13 +21,6 @@ $file = new Utility('./logfile.txt');
 
 echo $file->appendContent('hello world');
 // ... hello world
-```
-
-```php
-$file = new Utility('./src/RandomClassForTestingWith.php');
-
-echo $file->className();
-// RandomClassForTestingWith
 ```
 
 ### content `string`
@@ -46,7 +46,7 @@ $file->delete();
 
 ### directory `Utility`
 
-Get the directory of the path
+Get the directory of the path. A path that exists as a directory is always returned as is, even if its name has a dot (`v1.2`, `.git`); for paths that do not exist, an extension means a file.
 
 ```php
 $file = new Utility('./src/RandomClassForTestingWith.php');
@@ -65,14 +65,14 @@ Does the file or directory actually exists
 ```php
 $file = new Utility('./src/RandomClassForTestingWith.php');
 
-echo $file->exits(); // true
+echo $file->exists(); // true
 $file->delete();
-echo $file->exits(); // false
+echo $file->exists(); // false
 ```
 
 ### extension `string`
 
-Does the file or directory actually exists
+Guess the path's file extension
 
 ```php
 $file = new Utility('./src/RandomClassForTestingWith.php');
@@ -80,7 +80,7 @@ $file = new Utility('./src/RandomClassForTestingWith.php');
 echo $file->extension(); // php
 
 // get with dot prefix
-echo $file->exits(true); // .php
+echo $file->extension(true); // .php
 ```
 
 ### files `array`
@@ -138,11 +138,11 @@ Checks if the path is a file
 ```php
 $file = new Utility('./src/');
 
-echo $file->isDirectory();  // false
+echo $file->isFile();  // false
 
 $file = new Utility('./src/RandomClassForTestingWith.php');
 
-echo $file->isDirectory();  // true
+echo $file->isFile();  // true
 ```
 
 ### makeDirectory `Utility`
@@ -157,7 +157,7 @@ echo $file->makeDirectory();
 
 ### namespace `string`
 
-Get the namespace of the file (if it's a PHP file)
+Get the namespace of the file (if it's a PHP file). The file is tokenised, so braced namespaces, tabs, CRLF line endings and commented-out declarations are handled. Throws `FileFormatException` when no namespace is declared. The old misspelt `FileFormatExpection` is deprecated but remains its parent class, so existing catch blocks keep working.
 
 ```php
 $file = new Utility('./src/RandomClassForTestingWith.php');
@@ -165,9 +165,21 @@ $file = new Utility('./src/RandomClassForTestingWith.php');
 echo $file->namespace();  // App
 ```
 
+### lines `Generator`
+
+Stream the file one line at a time without loading it all into memory. Line endings are stripped. Throws `FileNotFoundException` straight away if the file does not exist.
+
+```php
+$file = new Utility('./logfile.txt');
+
+foreach ($file->lines() as $line) {
+    echo $line;
+}
+```
+
 ### name `string`
 
-Does the file or directory actually exists
+Get the file or directory name, optionally with its extension
 
 ```php
 $file = new Utility('./src/RandomClassForTestingWith.php');
@@ -188,14 +200,16 @@ $file = new Utility('./src/RandomClassForTestingWith.php');
 echo $file->path();  // ./src/RandomClassForTestingWith.php
 ```
 
-### content `setContent`
+### setContent `Utility`
 
-If the path is a file and if it exists, sets the content of the file
+If the path is a file and if it exists, sets the content of the file.
+
+The write is atomic: content goes to a temporary file in the same directory, which is then renamed over the original, so readers never see a partial file. Permissions are preserved and symlinks are written through. `appendContent` writes in place under an exclusive lock.
 
 ```php
 $file = new Utility('./logfile.txt');
 
-echo $file->appendContent('hello world');
+echo $file->setContent('hello world');
 // hello world
 ```
 
@@ -213,7 +227,7 @@ echo $file->touchFile();
 
 Touch a file or directory, to ensure it exists.
 
-If the path doesn't see a file extension, a directory is assumed to be wanted.
+If the path doesn't exist and has no file extension, a directory is assumed to be wanted. A path that already exists is left untouched.
 
 ```php
 $file = new Utility('~/Code/app.php');
@@ -224,3 +238,8 @@ $file = new Utility('~/Code/app');
 
 echo $file->touch(); // directory created
 ```
+
+## Security
+
+- Pass a `$root` as the second constructor argument (`new Utility($path, $root)`) to confine reads (`content`, `namespace`, `lines`, `files`) and mutating operations (`delete`, `setContent`, `appendContent`, `touch`, `touchFile`, `makeDirectory`). Paths that resolve outside `$root` are refused. Without a `$root`, no confinement applies, so never build paths from untrusted input without one.
+- Stream wrapper paths such as `phar://`, `php://`, `data:` and `http://` are rejected with an `InvalidArgumentException`. Only plain paths and `file:` are accepted.
